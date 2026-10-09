@@ -4,19 +4,25 @@
 
 input=$(cat)
 
-IFS=$'\t' read -r sid model dir ctx_pct ctx_tok ctx_size h5 h5r d7 d7r < <(
-  echo "$input" | /usr/bin/jq -r '[
+if ! command -v jq >/dev/null; then
+  printf 'statusline: jq missing\n'
+  exit 0
+fi
+
+# Unit separator, not tab: IFS whitespace would merge empty fields and shift later values.
+IFS=$'\x1f' read -r sid model dir ctx_pct ctx_tok ctx_size h5 h5r d7 d7r < <(
+  echo "$input" | jq -r '[
     (.session_id // ""),
     (.model.display_name // ""),
     ((.workspace.current_dir // .cwd // "") | split("/") | last // ""),
-    (.context_window.used_percentage // ""),
+    ((.context_window.used_percentage | numbers | round) // ""),
     (.context_window.total_input_tokens // ""),
     (.context_window.context_window_size // ""),
-    (.rate_limits.five_hour.used_percentage // ""),
+    ((.rate_limits.five_hour.used_percentage | numbers | round) // ""),
     (.rate_limits.five_hour.resets_at // ""),
-    (.rate_limits.seven_day.used_percentage // ""),
+    ((.rate_limits.seven_day.used_percentage | numbers | round) // ""),
     (.rate_limits.seven_day.resets_at // "")
-  ] | map(tostring) | join("\t")'
+  ] | map(tostring) | join("\u001f")'
 )
 
 RST=$'\033[0m'
@@ -48,7 +54,7 @@ until_reset() {
 
 usage_part() {
   [ -z "$2" ] && return
-  local p; p=$(printf '%.0f' "$2")
+  local p=$2
   local out; out="$1 $(color_for "$p")${p}%${RST}"
   if [ -n "$3" ]; then
     local r; r=$(until_reset "$3")
@@ -81,7 +87,7 @@ if [[ $cave =~ ^[a-z-]+$ ]] && [ "$cave" != off ]; then
 fi
 
 if [ -n "$ctx_pct" ]; then
-  p=$(printf '%.0f' "$ctx_pct")
+  p=$ctx_pct
   part="ctx $(color_for "$p")${p}%${RST}"
   if [ -n "$ctx_tok" ] && [ -n "$ctx_size" ]; then
     part="$part${DIM}($(human_tokens "$ctx_tok")/$(human_tokens "$ctx_size"))${RST}"

@@ -75,8 +75,7 @@ curl -fsSL $base/statusline.sh -o ~/.claude/statusline.sh
 ```
 
 Add this entry to `~/.claude/settings.json` to show the status line.
-The script needs `jq` at `/usr/bin/jq`.
-macOS 15 and later include it.
+The script needs `jq` on `PATH`.
 
 ```
 "statusLine": {
