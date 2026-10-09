@@ -10,7 +10,7 @@ import pytest
 SCRIPT = Path(__file__).resolve().parent.parent / "statusline.sh"
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 FAR_FUTURE = 4102444800
-BASH = shutil.which("bash")
+BASH = shutil.which("bash") or "/bin/bash"
 
 
 def run(payload, config_dir, path=None):
