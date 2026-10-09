@@ -1,5 +1,7 @@
 import json
+import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -8,15 +10,16 @@ import pytest
 SCRIPT = Path(__file__).resolve().parent.parent / "statusline.sh"
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 FAR_FUTURE = 4102444800
+BASH = shutil.which("bash")
 
 
-def run(payload, config_dir):
+def run(payload, config_dir, path=None):
     result = subprocess.run(
-        ["bash", str(SCRIPT)],
+        [BASH, str(SCRIPT)],
         input=json.dumps(payload),
         capture_output=True,
         text=True,
-        env={"PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/local/bin", "CLAUDE_CONFIG_DIR": str(config_dir)},
+        env={"PATH": path or os.environ["PATH"], "CLAUDE_CONFIG_DIR": str(config_dir)},
         check=True,
     )
     return ANSI.sub("", result.stdout).strip()
@@ -52,10 +55,19 @@ FULL = {
     ],
     ids=["full", "null-ctx-pct", "no-rate-limits", "seven-day-only", "root-cwd", "empty"],
 )
+@pytest.mark.skipif(shutil.which("jq") is None, reason="jq not on PATH")
 def test_output(payload, expected, tmp_path):
     assert re.search(expected, run(payload, tmp_path))
 
 
+def test_jq_missing(tmp_path):
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    (bin_dir / "cat").symlink_to(shutil.which("cat"))
+    assert run(FULL, tmp_path, path=str(bin_dir)) == "statusline: jq missing"
+
+
+@pytest.mark.skipif(shutil.which("jq") is None, reason="jq not on PATH")
 def test_caveman_badge(tmp_path):
     sessions = tmp_path / ".caveman-sessions"
     sessions.mkdir()
