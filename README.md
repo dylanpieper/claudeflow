@@ -31,6 +31,7 @@ Hooks and permission settings still apply.
 - **[CLAUDE.md](CLAUDE.md)**: Rules for every session (e.g., one purpose for each branch and PR).
 - **[rules/roborev.md](rules/roborev.md)**: How Claude uses roborev to review or fix commits before opening a PR.
 - **[hooks/git-commit-guard.sh](hooks/git-commit-guard.sh)**: Blocks commits to the default branch and asks you to approve all other commits.
+- **[statusline.sh](statusline.sh)**: Status line with model, folder, caveman mode, context use, and 5-hour and 7-day plan use.
 - **[research-writing](skills/research-writing/SKILL.md)**: APA 7 and open-science rules.
 - **[viz](skills/viz/SKILL.md)**: Rules for figures, charts, maps, and tables, and how to choose a tool.
 - **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to check for outdated instructions and open a PR with fixes.
@@ -70,6 +71,18 @@ for f in r python web maps; do curl -fsSL $base/skills/viz/references/$f.md -o ~
 curl -fsSL $base/skills/audit-instructions/SKILL.md -o ~/.claude/skills/audit-instructions/SKILL.md
 curl -fsSL $base/hooks/git-commit-guard.sh -o ~/.claude/hooks/git-commit-guard.sh
 chmod +x ~/.claude/hooks/git-commit-guard.sh
+curl -fsSL $base/statusline.sh -o ~/.claude/statusline.sh
+```
+
+Add this entry to `~/.claude/settings.json` to show the status line.
+The script needs `jq` at `/usr/bin/jq`.
+macOS 15 and later include it.
+
+```
+"statusLine": {
+  "type": "command",
+  "command": "bash ~/.claude/statusline.sh"
+}
 ```
 
 The three git rules in `CLAUDE.md` are text that Claude can ignore.
