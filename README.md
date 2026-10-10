@@ -24,9 +24,23 @@ merge (human)
 
 ## In this repo
 
-Project `AGENTS.md` or `CLAUDE.md` rules override my rules, except for three git rules.
-My rules override installed skills and plugins.
-Hooks and permission settings still apply.
+Order of precedence, from highest to lowest:
+
+1. Three git rules in [CLAUDE.md](CLAUDE.md). A project cannot override them.
+   - A human approves each commit before Claude makes it.
+   - Claude does not commit directly to the default branch (usually `main`).
+   - Only a human merges a pull request. Claude never merges.
+2. My direct instructions to Claude in the session.
+3. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
+4. My instructions in this repo:
+   - `CLAUDE.md`.
+   - `rules/r.md`, `rules/python.md`, and `rules/roborev.md`.
+   - `skills/audit-instructions`, `skills/research-writing`, and `skills/viz`.
+5. Instructions that I install from other sources:
+   - Skills and plugins, including roborev skills in `~/.claude/skills/`.
+   - The Clanker Constitution, which I link into `~/.claude/rules/`.
+
+Hooks and permission settings always apply. No instruction file can override them.
 
 - **[CLAUDE.md](CLAUDE.md)**: Rules for every session (e.g., one purpose for each branch and PR).
 - **[rules/roborev.md](rules/roborev.md)**: How Claude uses roborev to review or fix commits before opening a PR.
