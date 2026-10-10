@@ -63,6 +63,7 @@ Sources:
   - The limit is 25 coordinates for `driving`, `walking`, and `cycling`.
   - The limit is 10 coordinates for `driving-traffic`.
   - The limit counts origins and destinations together. Each chunk holds the limit minus the number of destinations.
+  - If the destinations alone reach the limit, send the destinations in chunks too.
 - Include facilities outside the study area, for example all hospitals within 100 km of the border.
 - Measure from a population-weighted centroid when you can. A geometric centroid is less accurate.
 - Travel time changes with traffic.
