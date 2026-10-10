@@ -132,7 +132,9 @@ Sources:
 ```r
 fix_background <- function(plot) {
   background <- calc_element("plot.background", complete_theme(plot@theme))
-  background@inherit.blank <- FALSE
+  if (S7::S7_inherits(background, element_rect)) {
+    background@inherit.blank <- FALSE
+  }
   cowplot::plot_grid(plot + theme(plot.background = element_blank())) +
     theme(plot.background = background)
 }
