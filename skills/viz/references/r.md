@@ -1,5 +1,7 @@
 # R figures and tables
 
+For themes, color, text, fonts, and export, read [grammar-style.md](grammar-style.md).
+
 ## Distributions
 
 - For a small sample, show each point with `ggbeeswarm::geom_quasirandom()` or `ggforce::geom_sina()`.
