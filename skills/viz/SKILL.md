@@ -1,14 +1,15 @@
 ---
 name: viz
-description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, D3, Leaflet with OpenStreetMap, gt). Use when you make or change a figure, chart, map, or table in any language.
+description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, D3, Leaflet with OpenStreetMap, mapgl with MapLibre, gt). Use when you make or change a figure, chart, map, or table in any language.
 ---
 
 # Visualization
 
-These rules come from two sources:
+These rules come from three sources:
 
 - Cédric Scherer, [Beyond Bar and Box Plots](https://z3tt.github.io/beyond-bar-and-box-plots);
-- Cara Thompson, [blog and talks](https://www.cararthompson.com/posts).
+- Cara Thompson, [blog and talks](https://www.cararthompson.com/posts);
+- Kyle Walker, [blog](https://walker-data.com/blog.html), for maps.
 
 If the `dataviz` skill is available, use it for color and visual design.
 These rules override it when they conflict.
@@ -40,6 +41,7 @@ These rules override it when they conflict.
 | Standard interactive chart | plotly | plotly | react-plotly.js |
 | Custom interactive graphic | Not applicable | Not applicable | D3 |
 | Interactive map | leaflet | folium | react-leaflet |
+| Large or 3D interactive map | mapgl | pydeck | maplibre-gl |
 | Table | gt | great_tables | Not applicable |
 
 - Start with a static figure. Make a figure interactive only when both of these are true:
@@ -58,4 +60,6 @@ Read the file for the tool that you use:
 - [references/grammar-style.md](references/grammar-style.md): ggplot2 and plotnine themes, color, text, fonts, and export.
 - [references/python.md](references/python.md): plotnine, seaborn, plotly, and great_tables.
 - [references/web.md](references/web.md): D3 and plotly.js in React.
-- [references/maps.md](references/maps.md): Leaflet, OpenStreetMap tiles, and geodata.
+- [references/maps.md](references/maps.md): Leaflet, OpenStreetMap tiles, mapgl, vector tiles, and dense points.
+
+For spatial data and analysis, use the `spatial` skill.
