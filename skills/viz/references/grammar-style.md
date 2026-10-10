@@ -49,7 +49,8 @@ Sources:
 ## Color
 
 - Keep the palette in a named vector or a dict. Get each color by its name.
-- Apply one palette to both aesthetics: `scale_colour_manual(aesthetics = c("colour", "fill"), values = palette)`.
+- Apply one palette to both aesthetics:
+  - ggplot2: `scale_colour_manual(aesthetics = c("colour", "fill"), values = palette)`;
   - plotnine: `scale_color_manual(values = palette, aesthetics = ["color", "fill"])`.
 - Give light colors a dark contour.
   - For points, use a shape with a fill, map the group to `fill`, and set `colour` to a dark ink.
@@ -62,8 +63,9 @@ Sources:
   - To make tints, set `modification = "go_lighter"`.
   - Use a muted mix of the main colors for `na.value`.
   - The palette is a list of hex codes, so you can also use it in plotnine.
-- Check the finished plot with `colorblindr::cvd_grid(p)` (R).
-  - For plotnine, save the image and check it with a color vision deficiency simulator.
+- Check the finished plot for color vision deficiency:
+  - R: `colorblindr::cvd_grid(p)`;
+  - plotnine: save the image and check it with a color vision deficiency simulator.
 
 Sources:
 [A simple trick for applying accessible colour palettes within dataviz](https://www.cararthompson.com/posts/2026-07-03-accessible-colour-palettes/),
@@ -146,10 +148,8 @@ Sources:
 
 ## Parameterized plot functions
 
-- Calculate limits, color midpoints, and label padding from the full data, not from the filtered subset.
-  - Then the plots stay comparable.
-- Give each threshold a default value, so that a new input gets a safe value.
-  - In R, use `case_when(..., .default = ...)`.
+- Calculate limits, color midpoints, and label padding from the full data, so that the plots stay comparable.
+- Give each threshold a default value, for example with `case_when(..., .default = ...)` in R.
 - Make the title and counts from the data, for example with `nrow()`.
 - Test the output with a snapshot test. In R, use `vdiffr::expect_doppelganger()`.
 
