@@ -62,6 +62,7 @@ Sources:
 - The Mapbox Matrix API limits the coordinates in one request. Send the origins in chunks.
   - The limit is 25 coordinates for `driving`, `walking`, and `cycling`.
   - The limit is 10 coordinates for `driving-traffic`.
+  - The limit counts origins and destinations together. Each chunk holds the limit minus the number of destinations.
 - Include facilities outside the study area, for example all hospitals within 100 km of the border.
 - Measure from a population-weighted centroid when you can. A geometric centroid is less accurate.
 - Travel time changes with traffic.
