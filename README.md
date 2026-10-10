@@ -1,7 +1,7 @@
 # claudeflow
 
 ```
-request
+request*
    │
    ▼
  branch
@@ -22,7 +22,7 @@ review ───┘
 merge*
 ```
 
-\* A human approves this step.
+\* A human acts.
 
 ## In this repo
 
