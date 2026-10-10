@@ -20,7 +20,7 @@ A "plotnine" item shows a name or a gap that is different.
 | `list(shape = 22)` | `{"shape": "s"}` |
 | `legend.justification = 0` | `legend_justification = "left"` |
 | `margin(b = 12)` | `{"b": 12, "units": "pt"}` |
-| `ggsave(p, ...)` | `p.save(..., dpi = 300)` |
+| `ggsave("f.png", plot = p, ...)` | `p.save("f.png", dpi = 300)` |
 | `scales::number()` | `mizani.labels.label_number()` |
 
 ## Theme function
@@ -124,14 +124,17 @@ Sources:
   - In RStudio, set the graphics backend to AGG.
 - When you save, set the size, `dpi` (300 or more), and the background.
   - ggplot2: `ggsave(width = , height = , dpi = , bg = )`.
-  - plotnine: `figure_size` in the theme and `p.save(dpi = )`.
+  - plotnine: `figure_size` and `plot_background = element_rect(fill = )` in the theme, and `p.save(dpi = )`.
 - In ggplot2, a fixed coordinate system (`coord_sf()`, `coord_fixed()`) can leave the background short of the image edge.
   - Use this cowplot wrapper to fill the image with the plot background.
+  - It reads the full theme, so it also works when the plot has no added theme.
 
 ```r
 fix_background <- function(plot) {
+  background <- calc_element("plot.background", complete_theme(plot@theme))
+  background@inherit.blank <- FALSE
   cowplot::plot_grid(plot + theme(plot.background = element_blank())) +
-    theme(plot.background = plot$theme$plot.background)
+    theme(plot.background = background)
 }
 ```
 
