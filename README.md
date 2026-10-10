@@ -1,25 +1,25 @@
 # claudeflow
 
 ```
-request*
-   │
-   ▼
- branch
-   │
-   ▼
-change ◄──┐
-   │      │
-   ▼      │
-commit*   │ fail
-   │      │
-   ▼      │
-review ───┘
-   │ pass
-   ▼
-  PR*
-   │
-   ▼
-merge*
+* request
+     │
+     ▼
+  branch
+     │
+     ▼
+  change ◄──┐
+     │      │
+     ▼      │
+* commit    │ fail
+     │      │
+     ▼      │
+  review ───┘
+     │ pass
+     ▼
+*   PR
+     │
+     ▼
+* merge
 ```
 
 \* A human acts.
