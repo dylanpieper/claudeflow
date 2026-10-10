@@ -9,16 +9,21 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
 
 - For a small sample, show each point.
   - Use `ggbeeswarm::geom_quasirandom()`, `ggforce::geom_sina()`, or `ggdist::stat_dots(layout = "swarm", side = "both")`.
-  - Do not show a violin or a density alone. Its shape is not reliable for few points.
+  - Do not show a violin or a density alone.
+  - Its shape is not reliable for few points.
 - For a large sample, show the shape with `ggdist` or `ggridges`.
   - Add the data points when they stay readable.
-- For a compact view of many points, use a barcode strip: `geom_point(shape = 95, size = 20, alpha = .33)`.
+- For a compact view of many points, use a barcode strip.
+  - When the value axis is vertical, use `geom_point(shape = 95, size = 20, alpha = .33)`.
+  - When the value axis is horizontal, use `shape = 124`.
+  - Shape 95 does not turn, so its marks merge into a line on a horizontal value axis.
 - To show intervals, use `ggdist::stat_interval(.width = c(.25, .5, .95, 1))`.
   - Add the median as a point with `stat_summary(geom = "point", fun = median)`.
 - For many groups or a change over time, use `ggridges::geom_density_ridges(rel_min_height = .01)`.
   - `rel_min_height` cuts the long flat tails.
   - For quartile fills, use `stat_density_ridges(geom = "density_ridges_gradient", calc_ecdf = TRUE, quantiles = 4)` with `fill = factor(after_stat(quantile))`.
-  - Do not show quartile lines for a small sample. They can mislead.
+  - Do not show quartile lines for a small sample.
+  - They can mislead.
 
 ## Box plots, violins, and bars
 
@@ -26,7 +31,8 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
   - Put the data points on each box plot.
 - To put a box plot in a violin, use a narrow `geom_boxplot(width = .1, coef = 0, outlier.shape = NA)`.
   - Add the median as a point with `stat_summary()`.
-- A dynamite plot (a bar with error bars) shows only the mean and one spread value per group. Do not use it.
+- Do not use a dynamite plot (a bar with error bars).
+  - It shows only the mean and one spread value per group.
   - If you must show error bars, tell in the caption if they are SD, SE, or a confidence interval.
 
 ## Show the sample size in the shape
@@ -51,9 +57,12 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
 - Put a narrow `geom_boxplot(width = .2, outlier.shape = NA)` in the middle.
 - Put the points on the other side with `ggdist::stat_dots(side = "left")`.
   - Or, show the points as a barcode strip with `position_nudge()`.
-  - Do not use `gghalves::geom_half_point()`. It fails with ggplot2 4.0.
+  - Do not use `gghalves::geom_half_point()`.
+  - It fails with ggplot2 4.0.
 - Use `justification` or `position_nudge()` to move the layers apart.
-- For long group names, flip the plot with `coord_flip()` and order the groups with `forcats::fct_rev()`.
+- For long group names, put the groups on the y axis: `aes(x = value, y = group)`.
+  - ggplot2 and ggdist detect the orientation, so you do not need `coord_flip()`.
+  - Order the groups from top to bottom with `forcats::fct_rev()`.
 
 ## Layers, colors, and labels
 
@@ -63,9 +72,11 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
   - Give both layers the same `position_jitter(seed = ...)`, so that the outlines align.
 - With `geom_boxplot()` and points, set `outlier.shape = NA`, so that each outlier shows only one time.
 - For jitter, set a small `width` and `height = 0`, so that the values on the value axis stay correct.
-- To make a fill a lighter copy of its group color, use `stage()`:
+- To make a fill a lighter copy of its group color, use one of these:
+  - `aes(colour = group, fill = after_scale(colorspace::lighten(colour, .5)))`;
   - `aes(fill = stage(group, after_scale = colorspace::lighten(fill, .5)))`.
-  - `aes(fill = after_scale(...))` alone removes the group fill in ggplot2 4.0, and the fill becomes white.
+- Do not use `after_scale()` on `fill` when the layer does not map `fill`.
+  - In ggplot2 4.0, the fill then becomes white.
 - Make group labels with the sample size, for example `"{group}\n(n = {n})"`.
 - Order the groups with `forcats::fct_reorder(group, value, median)`.
 - For color, use `rcartocolor` or `viridis`.
