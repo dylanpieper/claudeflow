@@ -35,7 +35,7 @@ Order of precedence, from highest to lowest:
 4. My instructions in this repo:
    - `CLAUDE.md`.
    - `rules/r.md`, `rules/python.md`, and `rules/roborev.md`.
-   - `skills/audit-instructions`, `skills/research-writing`, and `skills/viz`.
+   - `skills/audit-instructions`, `skills/research-writing`, `skills/spatial`, and `skills/viz`.
 5. Instructions that I install from other sources:
    - Skills and plugins, including roborev skills in `~/.claude/skills/`.
    - The Clanker Constitution, which I link into `~/.claude/rules/`.
@@ -48,6 +48,7 @@ Hooks and permission settings always apply. No instruction file can override the
 - **[statusline.sh](statusline.sh)**: Status line with model, folder, caveman mode, context use, and 5-hour and 7-day plan use.
 - **[research-writing](skills/research-writing/SKILL.md)**: APA 7 and open-science rules.
 - **[viz](skills/viz/SKILL.md)**: Rules for figures, charts, maps, and tables, and how to choose a tool.
+- **[spatial](skills/spatial/SKILL.md)**: Rules for Census data, distance, travel time, and spatial clusters.
 - **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to check for outdated instructions and open a PR with fixes.
 - **[rules/r.md](rules/r.md)**: R preferences. Loads only for R files.
 - **[rules/python.md](rules/python.md)**: Python and frontend preferences. Loads only for Python and frontend files.
@@ -74,14 +75,15 @@ Hooks and permission settings always apply. No instruction file can override the
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-mkdir -p ~/.claude/rules ~/.claude/hooks ~/.claude/skills/research-writing ~/.claude/skills/viz/references ~/.claude/skills/audit-instructions
+mkdir -p ~/.claude/rules ~/.claude/hooks ~/.claude/skills/research-writing ~/.claude/skills/viz/references ~/.claude/skills/spatial ~/.claude/skills/audit-instructions
 curl -fsSL $base/CLAUDE.md -o ~/.claude/CLAUDE.md
 curl -fsSL $base/rules/r.md -o ~/.claude/rules/r.md
 curl -fsSL $base/rules/python.md -o ~/.claude/rules/python.md
 curl -fsSL $base/rules/roborev.md -o ~/.claude/rules/roborev.md
 curl -fsSL $base/skills/research-writing/SKILL.md -o ~/.claude/skills/research-writing/SKILL.md
 curl -fsSL $base/skills/viz/SKILL.md -o ~/.claude/skills/viz/SKILL.md
-for f in r python web maps; do curl -fsSL $base/skills/viz/references/$f.md -o ~/.claude/skills/viz/references/$f.md; done
+for f in r grammar-style python web maps; do curl -fsSL $base/skills/viz/references/$f.md -o ~/.claude/skills/viz/references/$f.md; done
+curl -fsSL $base/skills/spatial/SKILL.md -o ~/.claude/skills/spatial/SKILL.md
 curl -fsSL $base/skills/audit-instructions/SKILL.md -o ~/.claude/skills/audit-instructions/SKILL.md
 curl -fsSL $base/hooks/git-commit-guard.sh -o ~/.claude/hooks/git-commit-guard.sh
 chmod +x ~/.claude/hooks/git-commit-guard.sh

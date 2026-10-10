@@ -57,6 +57,7 @@ Choosing a manager for a new project:
 - Use `cli` for console output (e.g. `cli::cli_alert_success()`), not `cat()`, `message()`, or `print()`.
 - Clean column names with `janitor::clean_names()`.
 - For figures, maps, and tables, use the viz skill.
+- For spatial data and analysis, use the spatial skill.
 
 ## Project stack
 
