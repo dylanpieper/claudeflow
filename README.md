@@ -10,17 +10,19 @@ request
 change ◄──┐
    │      │
    ▼      │
-commit    │ fail
+commit*   │ fail
    │      │
    ▼      │
 review ───┘
    │ pass
    ▼
-  PR
+  PR*
    │
    ▼
-merge (human)
+merge*
 ```
+
+\* A human approves this step.
 
 ## In this repo
 
