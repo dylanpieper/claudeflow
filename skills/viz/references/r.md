@@ -73,7 +73,8 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
   - `aes(colour = group, fill = after_scale(colorspace::lighten(colour, .5)))`;
   - `aes(fill = stage(group, after_scale = colorspace::lighten(fill, .5)))`.
 - Do not read `fill` inside `after_scale()` when the layer does not map `fill`.
-  - In ggplot2 4.0, an unmapped fill starts as the default white, so the result is white.
+  - An unmapped fill starts as the geom default, so the group color does not show.
+  - The default is white for `geom_boxplot()` and `geom_violin()`, and grey for `geom_col()`.
 - Make group labels with the sample size, for example `"{group}\n(n = {n})"`.
 - Order the groups with `forcats::fct_reorder(group, value, median)`.
 - For color, use `rcartocolor` or `viridis`.
