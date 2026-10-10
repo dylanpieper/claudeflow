@@ -59,11 +59,13 @@ Sources:
   - R: `mapboxapi::mb_matrix()` and `mb_isochrone()`;
   - Python: `routingpy` with `MapboxOSRM`;
   - without Mapbox: a self-hosted OSRM or Valhalla server.
-- The Mapbox Matrix API accepts not more than 25 coordinates in one request. Send the origins in chunks.
+- The Mapbox Matrix API limits the coordinates in one request. Send the origins in chunks.
+  - The limit is 25 coordinates for `driving`, `walking`, and `cycling`.
+  - The limit is 10 coordinates for `driving-traffic`.
 - Include facilities outside the study area, for example all hospitals within 100 km of the border.
 - Measure from a population-weighted centroid when you can. A geometric centroid is less accurate.
 - Travel time changes with traffic.
-  - Set a future weekday time: `mb_isochrone(depart_at = "2025-09-11T17:30")`.
+  - Set a departure time on a future weekday: `mb_isochrone(depart_at = "YYYY-MM-DDT17:30")`.
   - Compare noon and rush hour.
 - To show access from one place, make an accessibility surface:
   - make isochrones at 1-minute steps;
