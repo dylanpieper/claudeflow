@@ -74,7 +74,7 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
   - `aes(fill = stage(group, after_scale = colorspace::lighten(fill, .5)))`.
 - Do not read `fill` inside `after_scale()` when the layer does not map `fill`.
   - An unmapped fill starts as the geom default, so the group color does not show.
-  - The default is white for `geom_boxplot()` and `geom_violin()`, and grey for `geom_col()`.
+  - The default is white for `geom_boxplot()` and `geom_violin()`, and gray for `geom_histogram()` and `geom_col()`.
 - Make group labels with the sample size, for example `"{group}\n(n = {n})"`.
 - Order the groups with `forcats::fct_reorder(group, value, median)`.
 - For color, use `rcartocolor` or `viridis`.
