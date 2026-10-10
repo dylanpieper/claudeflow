@@ -32,7 +32,10 @@ Order of precedence, from highest to lowest:
    - Only a human merges a pull request. Claude never merges.
 2. My direct instructions to Claude in the session.
 3. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
-4. My instructions in this repo: `CLAUDE.md`, the three files in `rules/`, and the skills in `skills/`.
+4. My instructions in this repo:
+   - `CLAUDE.md`.
+   - `rules/r.md`, `rules/python.md`, and `rules/roborev.md`.
+   - The skills in `skills/`.
 5. Instructions that I install from other sources:
    - Skills and plugins.
    - The Clanker Constitution, which I link into `~/.claude/rules/`.
