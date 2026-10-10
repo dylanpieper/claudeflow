@@ -38,7 +38,7 @@ Order of precedence, from highest to lowest:
    - `skills/audit-instructions`, `skills/research-writing`, and `skills/viz`.
 5. Instructions that I install from other sources:
    - Skills and plugins.
-   - Skills that other tools, such as roborev, put in `~/.claude/skills/`.
+     - This includes skills that other tools, such as roborev, put in `~/.claude/skills/`.
    - The Clanker Constitution, which I link into `~/.claude/rules/`.
 
 Hooks and permission settings always apply. No instruction file can override them.
