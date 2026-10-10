@@ -59,11 +59,10 @@ Sources:
   - R: `mapboxapi::mb_matrix()` and `mb_isochrone()`;
   - Python: `routingpy` with `MapboxOSRM`;
   - without Mapbox: a self-hosted OSRM or Valhalla server.
-- The Mapbox Matrix API limits the coordinates in one request. Send the origins in chunks.
+- The Mapbox Matrix API limits the coordinates in one request: origins and destinations together.
   - The limit is 25 coordinates for `driving`, `walking`, and `cycling`.
   - The limit is 10 coordinates for `driving-traffic`.
-  - The limit counts origins and destinations together. Each chunk holds the limit minus the number of destinations.
-  - If the destinations alone reach the limit, send the destinations in chunks too.
+  - Split the origins, and the destinations if necessary, so that each request stays within the limit.
 - Include facilities outside the study area, for example all hospitals within 100 km of the border.
 - Measure from a population-weighted centroid when you can. A geometric centroid is less accurate.
 - Travel time changes with traffic.
