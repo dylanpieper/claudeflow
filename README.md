@@ -27,7 +27,7 @@ merge (human)
 Order of precedence, from highest to lowest:
 
 1. Three git rules in [CLAUDE.md](CLAUDE.md). A project cannot override them.
-   - A human approves each commit before Claude makes it.
+   - A human approves each commit and each new PR before Claude makes it.
    - Claude does not commit directly to the default branch (usually `main`).
    - Only a human merges a pull request. Claude never merges.
 2. My direct instructions to Claude in the session.

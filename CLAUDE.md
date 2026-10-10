@@ -48,7 +48,7 @@
 ## Workspace conventions
 
 - Three rules always apply, even when a project says otherwise:
-  - Get a human approval before a commit.
+  - Get a human approval before each commit and before each new PR.
   - Do not commit directly to the default branch (usually "main").
   - Never merge. Humans merge.
 - Except for these three rules, a project `AGENTS.md` or `CLAUDE.md` overrides my rules.
@@ -77,12 +77,14 @@ Branches:
 Commits and PRs:
 
 - Commit in small, logical steps with clear messages.
-- When the work is done, open a PR with `gh pr create`.
+- When the work is done, show the PR title and description, and ask for approval.
+  - Open the PR with `gh pr create` only after a human approves it.
+  - An approval of a commit is not an approval of a PR.
 - Before you open or update a PR, make sure that each commit on the branch agrees with the PR purpose.
 - In the PR description, tell what changed and why.
 - If no automated test covers a change, tell in the PR:
-  - how you verified the change;
-  - how another person can reproduce your verification.
+  - How you verified the change.
+  - How another person can reproduce your verification.
 
 ## Data stack
 
