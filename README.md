@@ -37,8 +37,7 @@ Order of precedence, from highest to lowest:
    - `rules/r.md`, `rules/python.md`, and `rules/roborev.md`.
    - `skills/audit-instructions`, `skills/research-writing`, and `skills/viz`.
 5. Instructions that I install from other sources:
-   - Skills and plugins.
-     - This includes skills that other tools, such as roborev, put in `~/.claude/skills/`.
+   - Skills and plugins, including roborev skills in `~/.claude/skills/`.
    - The Clanker Constitution, which I link into `~/.claude/rules/`.
 
 Hooks and permission settings always apply. No instruction file can override them.
