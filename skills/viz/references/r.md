@@ -5,6 +5,8 @@ The distribution rules come from Cédric Scherer,
 ([source](https://github.com/z3tt/beyond-bar-and-box-plots)).
 The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat()` for computed values.
 
+For themes, color, text, fonts, and export, read [grammar-style.md](grammar-style.md).
+
 ## Choose a distribution chart
 
 - For a small sample, show each point.

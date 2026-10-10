@@ -1,5 +1,7 @@
 # Python figures and tables
 
+For plotnine themes, color, text, fonts, and export, read [grammar-style.md](grammar-style.md).
+
 - For static figures, use `plotnine`. It has the same grammar as ggplot2.
   - Use `seaborn` for a quick statistical plot.
   - Use `matplotlib` only for fine control of a figure.
