@@ -30,9 +30,12 @@ Order of precedence, from highest to lowest:
    - A human approves each commit before Claude makes it.
    - Claude does not commit directly to the default branch (usually `main`).
    - Only a human merges a pull request. Claude never merges.
-2. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
-3. My instructions in this repo: `CLAUDE.md`, `rules/`, and `skills/`.
-4. Skills and plugins that I install from other sources.
+2. My direct instructions to Claude in the session.
+3. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
+4. My instructions in this repo: `CLAUDE.md`, the three files in `rules/`, and the skills in `skills/`.
+5. Instructions that I install from other sources:
+   - Skills and plugins.
+   - The Clanker Constitution, which I link into `~/.claude/rules/`.
 
 Hooks and permission settings always apply. No instruction file can override them.
 
