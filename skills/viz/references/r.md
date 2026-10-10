@@ -10,14 +10,13 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
 - For a small sample, show each point.
   - Use `ggbeeswarm::geom_quasirandom()`, `ggforce::geom_sina()`, or `ggdist::stat_dots(layout = "swarm", side = "both")`.
   - Do not show a violin or a density alone, because its shape is not reliable for few points.
-- For a large sample, show the shape with `ggdist` or `ggridges`.
-  - Add the data points when they stay readable.
+- For a large sample, show the shape with `ggdist` or `ggridges`, and add the points when they stay readable.
 - For a compact view of many points, use a barcode strip.
   - When the value axis is vertical, use `geom_point(shape = 95, size = 20, alpha = .33)`.
   - When the value axis is horizontal, use `shape = 124`.
   - Shape 95 does not turn, so its marks merge into a line on a horizontal value axis.
 - To show intervals, use `ggdist::stat_interval(.width = c(.25, .5, .95, 1))`.
-  - Add the median as a point with `stat_summary(geom = "point", fun = median)`.
+- To add the median as a point, use `stat_summary(geom = "point", fun = median)`.
 - For many groups or a change over time, use `ggridges::geom_density_ridges(rel_min_height = .01)`.
   - `rel_min_height` cuts the long flat tails.
   - For quartile fills, use `stat_density_ridges(geom = "density_ridges_gradient", calc_ecdf = TRUE, quantiles = 4)` with `fill = factor(after_stat(quantile))`.
@@ -26,9 +25,8 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
 ## Box plots, violins, and bars
 
 - Do not use a box plot alone, because it hides a distribution with more than one peak.
-  - Put the data points on each box plot.
-- To put a box plot in a violin, use a narrow `geom_boxplot(width = .1, coef = 0, outlier.shape = NA)`.
-  - Add the median as a point with `stat_summary()`.
+- Put the data points on each box plot.
+- To put a box plot in a violin, use a narrow `geom_boxplot(width = .1, coef = 0, outlier.shape = NA)` and a median point.
 - Do not use a dynamite plot (a bar with error bars).
   - A dynamite plot shows only the mean and one spread value per group.
   - If you must show error bars, tell in the caption if they are SD, SE, or a confidence interval.
@@ -66,7 +64,7 @@ The code uses ggplot2 4.0 argument names: `linewidth` for lines and `after_stat(
 - Put summary layers below the points.
 - Use `alpha` so that one layer does not hide another.
 - To give points an outline, add a second point layer with `shape = 1` and `colour = "black"`.
-  - Give both layers the same `position_jitter(seed = ...)`, so that the outlines align.
+- To align the outlines, give both point layers the same `position_jitter(seed = ...)`.
 - With `geom_boxplot()` and points, set `outlier.shape = NA`, so that each outlier shows only one time.
 - For jitter, set a small `width` and `height = 0`, so that the values on the value axis stay correct.
 - To make a fill a lighter copy of its group color, use one of these:
