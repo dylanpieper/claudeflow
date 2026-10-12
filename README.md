@@ -3,12 +3,12 @@
 My Claude Code setup.
 
 ```
-* request → branch → change → * commit → review → * PR → * merge
-                        ▲                 │
-                        └──── fail ───────┘
+👤 request → branch → change → 👤 commit → review → 👤 PR → 👤 merge
+                         ▲                  │
+                         └──── fail ────────┘
 ```
 
-\* A human acts.
+👤 A human acts.
 
 ## Precedence
 
