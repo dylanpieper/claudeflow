@@ -1,8 +1,21 @@
 # Web figures in React
 
+## Observable Plot
+
+- For static charts and charts with hover only, use `@observablehq/plot`.
+  - It uses the same grammar as ggplot2: marks, scales, and facets.
+  - It makes a plain SVG. Apply the color and text rules in `SKILL.md` to it.
+- Mount the chart in React:
+  - Call `Plot.plot()` in a `useEffect` hook.
+  - Append the result to a `useRef` element, and remove it in the cleanup function.
+- For hover, use the `tip` mark or the `tip` mark option.
+- For fixed data, render the SVG on the server or at build time.
+  - Give a virtual DOM to the `document` option of `Plot.plot()`.
+  - The page then has no chart JavaScript.
+
 ## plotly.js
 
-- For standard charts, use `react-plotly.js`.
+- For charts that need zoom, pan, or 3D, use `react-plotly.js`.
 - For more than about 10,000 points, use the WebGL traces (`scattergl`).
 
 ## D3
