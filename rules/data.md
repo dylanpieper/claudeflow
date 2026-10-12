@@ -21,7 +21,7 @@ A project `CLAUDE.md` or `AGENTS.md` overrides this file.
   - Use the `duckdb-skills` plugin.
   - Other tools are fine when they fit:
     - R: `duckplyr`, `dplyr` with `dbplyr`, or `arrow`.
-    - Python: `datar`, `pyarrow`, or `duckdb`.
+    - Python: `datar` with `datar-arrow`, `pyarrow`, or `duckdb`.
 - Small data with transactions or many small row reads and writes: use SQLite.
 
 ## Data dictionaries
