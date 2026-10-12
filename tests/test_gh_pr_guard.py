@@ -78,8 +78,8 @@ def test_create_asks(command):
         "gh api -X GET repos/o/r/pulls -f state=open",
         "git merge origin/main",
         "echo gh-pr-merge",
-        "echo gh pr merge 5",
         "gh pr -R o/r view 5",
+        "gh api -X GET repos/o/r/pulls -f q='a|b; c & d'",
         "grep -f patterns.txt x; gh api repos/o/r/pulls",
         "gh api graphql -f query='query { viewer { login } }'",
         "ls",
@@ -101,13 +101,44 @@ def test_graphql_query_from_file_asks(command):
     assert decision(command) == "ask"
 
 
-def test_missing_jq_reports_error():
+@pytest.mark.parametrize(
+    "command",
+    [
+        "if true; then gh pr merge 5; fi",
+        "for n in 1 2; do gh pr create --fill; done",
+        "(gh pr merge 5)",
+        "echo $(gh pr merge 5)",
+        "{ gh pr create --fill; }",
+        "echo 5 | xargs -n1 gh pr merge",
+        "timeout 30 gh pr merge 5",
+        "! gh pr merge 5",
+        "echo gh pr merge 5",
+        "gh api -X PUT -f commit_title='fix a|b' repos/o/r/pulls/7/merge",
+        "gh api -f title='A & B' repos/o/r/pulls -f head=x",
+        "git commit -m \"$(cat <<'EOF'\nIt's done\nEOF\n)\"\ngh pr merge 5",
+    ],
+)
+def test_gh_in_any_position_asks(command):
+    assert decision(command) == "ask"
+
+
+def run_without_jq(command):
     result = subprocess.run(
         [BASH, str(SCRIPT)],
-        input=json.dumps({"tool_input": {"command": "gh pr merge 1"}}),
+        input=json.dumps({"tool_input": {"command": command}}),
         capture_output=True,
         text=True,
         env={"PATH": "/nonexistent"},
+        check=True,
     )
-    assert result.returncode == 1
-    assert "jq is not on PATH" in result.stderr
+    return result.stdout
+
+
+def test_missing_jq_asks_for_gh_commands():
+    out = json.loads(run_without_jq("gh pr merge 1"))
+    assert out["hookSpecificOutput"]["permissionDecision"] == "ask"
+    assert "jq is not on PATH" in out["hookSpecificOutput"]["permissionDecisionReason"]
+
+
+def test_missing_jq_passes_other_commands():
+    assert run_without_jq("ls") == ""
