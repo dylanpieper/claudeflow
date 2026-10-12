@@ -21,21 +21,33 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 
 ## Package management
 
-- If a project already uses another package manager, such as `rv`, `uvr`, `rix`, or `ir`, use it.
-  - Follow its documentation to add a package.
-  - Do not add a second one.
-- In an `renv` project, add a package with `renv::install()`, then `renv::snapshot()`.
-  - To make `renv` use pak, add `options(renv.config.pak.enabled = TRUE)` to the project `.Rprofile`, before `source("renv/activate.R")`.
-  - Do not create a project `.Renviron`: it masks `~/.Renviron`, which holds tokens and keys.
-- If the project has no package manager, ask before you run `renv::init()`. Until then, use `pak::pak()`.
+Use the manager the project already has, and never add a second one. Ask before adding a new package manager.
+
+| Manager | Manifest | How to add a package |
+|---------|----------|----------------------|
+| [`renv`](https://rstudio.github.io/renv/) | `renv.lock` | `renv::install()`, then `renv::snapshot()` |
+| [`rv`](https://github.com/A2-ai/rv) | `rproject.toml` | Add to the manifest, then sync |
+| [`uvr`](https://github.com/nbafrank/uvr) | `uvr.toml` | Add to the manifest, then sync |
+| [`rix`](https://github.com/ropensci/rix) | `default.nix` | Add to the `rix::rix()` call (see below) |
+| [`ir`](https://github.com/r-lib/ir) | File header | Add to the header |
+
+- With no manager, use `pak::pak()`.
   - It installs from CRAN, GitHub (`"user/repo"`), and Bioconductor (`"bioc::pkg"`) in one call.
   - With no arguments, it installs the current package's development dependencies (requires a `DESCRIPTION`).
-- In an R package, declare dependencies in `DESCRIPTION` with `usethis::use_package()`. Use `renv` or `pak` only to install them.
-- For R and Python in one project, use `uv` for Python. For R, follow the rules above.
-  - `uv` keeps the Python packages in `pyproject.toml`, `uv.lock`, and `.venv/`.
-  - In R, call `reticulate::use_virtualenv(here::here(".venv"))` before the first Python call.
-  - Do not use `renv::use_python()`: it uses `pip` or `conda`, not `uv`. See [renv with Python](https://rstudio.github.io/renv/articles/python.html).
 - Never use `install.packages()`, `remotes::install_github()`, or `devtools::install_github()`.
+- To make `renv` use pak, add `options(renv.config.pak.enabled = TRUE)` to the project `.Rprofile`, before `source("renv/activate.R")`.
+  - Do not create a project `.Renviron`: it masks `~/.Renviron`, which holds tokens and keys.
+- With `rix`:
+  - Put CRAN and Bioconductor packages in `r_pkgs`, GitHub packages in `git_pkgs`.
+  - Rerun the call with `overwrite = TRUE` to regenerate `default.nix`. Never edit `default.nix` by hand.
+  - Rebuild with `nix-build` or `nix-shell`.
+
+Choosing a manager for a new project:
+
+- Default to `renv` for packages and `rig` for the R version.
+- Use `rv` or `uvr` when dependencies are known up front and install speed matters.
+- Use `rix` when every OS must get the same R version and system libraries.
+- Use `ir` for a standalone script or Quarto document outside any managed project; it needs no lockfile or project directory.
 
 ## Paths
 
@@ -82,19 +94,13 @@ For complex projects:
 
 ### Layout
 
-- `box/`: `box` modules with the project's functions. Scripts and apps only call them.
+- `R/`: functions. All logic lives here; scripts and the pipeline only call them.
+- `_targets.R`: the pipeline.
 - `config.yml`: settings.
 - `data-dict.yaml`: the data contract.
-- With `targets`:
-  - `_targets.R`: the pipeline.
-  - `R/`: all code that targets use, loaded with `tar_source()`. Do not put `box` modules here.
-  - Do not call `box` modules from the pipeline. `targets` does not track changes inside them.
-  - Put logic that the pipeline and an app share in `R/`. Apps read pipeline outputs, for example with `tar_read()`.
 
 ### Modules
 
-- In analysis projects and apps, put reusable code in `box` modules in `box/`.
-- Import a module with a path relative to the calling file, for example `box::use(./box/<name>)` from the project root.
 - `box::use()` caches modules for the whole R session. After editing a module, restart R or call `box::reload()` before running tests.
 
 ### Apps
