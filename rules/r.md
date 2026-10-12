@@ -48,9 +48,7 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 
 ## Tools
 
-- Format every `.R` file after writing or changing it.
-  - Use the project's formatter if it has one; otherwise use Air (`air format <path>`).
-  - Air does not format code chunks in R Markdown or Quarto files.
+- Format every `.R` file after writing or changing it, with the project's formatter or Air (`air format <path>`).
 - Use `cli` for console output (e.g. `cli::cli_alert_success()`), not `cat()`, `message()`, or `print()`.
 - Clean column names with `janitor::clean_names()`.
 - For large data, prefer [`duckplyr`](https://duckplyr.tidyverse.org/) with `dplyr` verbs. `arrow` is also fine.
@@ -58,11 +56,7 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
   - Convert an existing data frame with `as_duckdb_tibble()`.
   - Write results with `compute_parquet()`.
   - Do not use the deprecated `df_from_*()` or `as_duckplyr_tibble()`.
-- Alternatively, use `dplyr` with a `duckdb` connection, for example on an existing `.duckdb` database.
-  - Connect with `DBI::dbConnect(duckdb::duckdb(), dbdir = path)` and query with `tbl(con, "table")`.
-  - `dbplyr` translates the verbs to SQL. Add `dbplyr`, `DBI`, and `duckdb` to the project dependencies.
-  - Call `collect()` only for results that fit in memory.
-  - Close the connection with `DBI::dbDisconnect(con)`.
+- For an existing `.duckdb` database, use `dplyr` on a `duckdb` connection.
 - For figures, maps, and tables, use the viz skill.
 - For spatial data and analysis, use the spatial skill.
 
@@ -95,7 +89,6 @@ For complex projects:
 
 - In analysis projects and apps, put reusable code in `box` modules in `box/`.
 - Import a module with a path relative to the calling file, for example `box::use(./box/<name>)` from the project root.
-- `box::use()` caches modules for the whole R session. After editing a module, restart R or call `box::reload()` before running tests.
 
 ### Apps
 
