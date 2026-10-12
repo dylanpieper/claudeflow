@@ -1,11 +1,9 @@
 ---
 name: viz
-description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, Observable Plot, D3, Leaflet with OpenStreetMap, mapgl with MapLibre, gt). Use when you make or change a figure, chart, map, or table in any language. These rules win over other visualization skills, such as dataviz.
+description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, Observable Plot, D3, Leaflet with OpenStreetMap, mapgl with MapLibre, gt). Use when you make or change a figure, chart, map, or table in any language.
 ---
 
 # Visualization
-
-When another visualization skill, such as the built-in `dataviz` skill, conflicts with these rules, use these rules.
 
 ## Show the data
 
