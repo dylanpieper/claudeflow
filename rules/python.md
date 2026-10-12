@@ -26,8 +26,8 @@ When you build a web app with an API and a UI, use this stack.
 
 - Scope:
   - For a Shiny or shinyreact app with an R server, use `~/.claude/rules/r.md`, not the rules below.
-  - For the app database, this stack overrides the data stack in the global `~/.claude/CLAUDE.md`.
-  - For analytical or file-based work, also inside the app, use that data stack.
+  - For the app database, this stack overrides the data stack in `~/.claude/rules/data.md`.
+  - For analytical or file-based work, also inside the app, read `~/.claude/rules/data.md` and use that data stack.
 - Use FastAPI for the API and Pydantic for request and response schemas.
 - Use PostgreSQL for the database backend.
   - Pair with DuckDB for analytical queries.

@@ -36,7 +36,7 @@ Order of precedence, from highest to lowest:
 3. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
 4. My instructions in this repo:
    - `CLAUDE.md`.
-   - `rules/r.md`, `rules/python.md`, and `rules/roborev.md`.
+   - `rules/r.md`, `rules/python.md`, `rules/data.md`, and `rules/roborev.md`.
    - `skills/audit-instructions`, `skills/research-writing`, `skills/spatial`, and `skills/viz`.
 5. Instructions that I install from other sources:
    - Skills and plugins, including roborev skills in `~/.claude/skills/`.
@@ -54,6 +54,7 @@ Hooks and permission settings always apply. No instruction file can override the
 - **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to check for outdated instructions and open a PR with fixes.
 - **[rules/r.md](rules/r.md)**: R preferences. Loads only for R files.
 - **[rules/python.md](rules/python.md)**: Python and frontend preferences. Loads only for Python and frontend files.
+- **[rules/data.md](rules/data.md)**: Data stack and data dictionary rules. Loads only for data files and `data-dict.yaml`.
 
 ## Installed tools
 
@@ -81,6 +82,7 @@ mkdir -p ~/.claude/rules ~/.claude/hooks ~/.claude/skills/research-writing ~/.cl
 curl -fsSL $base/CLAUDE.md -o ~/.claude/CLAUDE.md
 curl -fsSL $base/rules/r.md -o ~/.claude/rules/r.md
 curl -fsSL $base/rules/python.md -o ~/.claude/rules/python.md
+curl -fsSL $base/rules/data.md -o ~/.claude/rules/data.md
 curl -fsSL $base/rules/roborev.md -o ~/.claude/rules/roborev.md
 curl -fsSL $base/skills/research-writing/SKILL.md -o ~/.claude/skills/research-writing/SKILL.md
 curl -fsSL $base/skills/viz/SKILL.md -o ~/.claude/skills/viz/SKILL.md
@@ -223,7 +225,8 @@ claude plugin install slidecrafting@slidecrafting
 
 ### 6. Command-line tools the rules call
 
-`CLAUDE.md` calls [gh](https://cli.github.com/) and [data-dict](https://github.com/tidyverse/data-dict).
+`CLAUDE.md` calls [gh](https://cli.github.com/).
+`rules/data.md` calls [data-dict](https://github.com/tidyverse/data-dict).
 `rules/r.md` calls [Air](https://posit-dev.github.io/air/).
 
 ```
