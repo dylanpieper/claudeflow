@@ -47,7 +47,7 @@ Hooks and permission settings always apply. No instruction file can override the
 - **[CLAUDE.md](CLAUDE.md)**: Rules for every session (e.g., one purpose for each branch and PR).
 - **[rules/roborev.md](rules/roborev.md)**: How Claude uses roborev to review or fix commits before opening a PR.
 - **[hooks/git-commit-guard.sh](hooks/git-commit-guard.sh)**: Blocks commits to the default branch and asks you to approve all other commits.
-- **[hooks/gh-pr-guard.sh](hooks/gh-pr-guard.sh)**: Asks you to approve each new PR, and each merge that no deny rule blocks.
+- **[hooks/gh-pr-guard.sh](hooks/gh-pr-guard.sh)**: Asks you to approve each new PR, and each `gh api` call that can write.
 - **[hooks/git-merge-guard.sh](hooks/git-merge-guard.sh)**: Asks you to approve each local merge, pull, or push that changes the default branch.
 - **[statusline.sh](statusline.sh)**: Status line with model, folder, caveman mode, context use, and 5-hour and 7-day plan use.
 - **[research-writing](skills/research-writing/SKILL.md)**: APA 7 and open-science rules.
@@ -116,7 +116,7 @@ These settings enforce them:
 - A deny rule blocks merges.
 - A hook blocks commits to the default branch and asks you to approve all other commits.
 - A hook asks you to approve each new PR through `gh`.
-  It also asks for each merge that the deny rule does not block, for example through `gh api`.
+  It also asks for each `gh api` call that can write, because a write can open or merge a PR.
 - A hook asks you to approve each local merge, pull, or push that changes the default branch.
 
 Add this rule to `permissions.deny` in `~/.claude/settings.json`:
@@ -144,7 +144,7 @@ The hook needs `jq`.
 
 Add this entry to `hooks.PreToolUse` too.
 It asks you to approve each new PR through `gh`.
-It also asks for each merge that the deny rule does not block, for example through `gh api`.
+It also asks for each `gh api` call that can write, because a write can open or merge a PR.
 It needs `jq`.
 
 ```

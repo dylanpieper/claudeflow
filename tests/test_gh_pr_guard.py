@@ -81,7 +81,7 @@ def test_create_asks(command):
         "gh pr -R o/r view 5",
         "gh api -X GET repos/o/r/pulls -f q='a|b; c & d'",
         "grep -f patterns.txt x; gh api repos/o/r/pulls",
-        "gh api graphql -f query='query { viewer { login } }'",
+        "gh api --method get repos/o/r/pulls -f state=open",
         "ls",
     ],
 )
@@ -98,6 +98,22 @@ def test_other_commands_pass(command):
     ],
 )
 def test_graphql_query_from_file_asks(command):
+    assert decision(command) == "ask"
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh api graphql -f query='query { viewer { login } }'",
+        "gh api graphql -f query='mutation ($id: ID!) { mergePullRequest(input: {pullRequestId: $id}) { clientMutationId } }'",
+        "gh api -f sha=$(git rev-parse HEAD) -X PUT repos/o/r/pulls/7/merge",
+        "gh api -f head=fix/gh -f base=main repos/o/r/pulls",
+        "gh api -XPUT repos/o/r/pulls/7/merge",
+        "gh api --method=PATCH repos/o/r/pulls/7 -f state=closed",
+        "gh api -X POST repos/o/r/issues -f title=x",
+    ],
+)
+def test_any_api_write_asks(command):
     assert decision(command) == "ask"
 
 

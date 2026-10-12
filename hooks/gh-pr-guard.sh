@@ -1,8 +1,7 @@
 #!/bin/bash
 # PreToolUse hook for Bash.
-# Asks the user to approve each pull request merge, also auto-merge, through `gh pr merge` or `gh api`.
-# Asks the user to approve each new pull request, through `gh pr create`, `gh pr new`, or `gh api`.
-# Asks for each `gh api graphql` call that reads its query from a file, because the hook cannot see it.
+# Asks the user to approve each `gh pr merge`, `gh pr create`, and `gh pr new`.
+# Asks the user to approve each `gh api` call that can write, because a write can open or merge a PR.
 # Asks for each command that mentions `gh` when `jq` is missing, because the hook cannot parse it.
 # Other commands get no decision.
 # Limits: the hook reads the command text only.
@@ -45,11 +44,9 @@ split_command() {
   }' <<<"$1"
 }
 
-write_re='[[:space:]](-[fFX]|--field|--raw-field|--method|--input)([[:space:]=]|[^[:space:]])'
-get_re='[[:space:]](-X|--method)[[:space:]=]*GET([[:space:]]|$)'
-api_merge_re='pulls/[^[:space:]/]+/merge([^[:alnum:]_/]|$)'
-api_create_re="repos/[^[:space:]]+/pulls([[:space:]\"'?]|$)"
-query_file_re='[[:space:]](--input|(-F|--field)[[:space:]=]*query=@)'
+field_re='[[:space:]](-[fF]|--field|--raw-field|--input)([[:space:]=]|[^[:space:]])'
+method_re="[[:space:]](-X|--method)[[:space:]=]*[\"']?([A-Za-z]+)"
+graphql_re='[[:space:]]graphql([[:space:]]|$)'
 
 # Sets NW to word $1 without quotes, leading ( { ! $ backtick backslash, and trailing ) } ; backtick.
 norm() {
@@ -75,19 +72,23 @@ check_pr() {
   esac
 }
 
+# Asks for a segment with a `gh api` call that can write: any graphql call,
+# any method other than GET, or fields or input without a GET method.
+# The hook does not parse the endpoint, so it also asks for writes that are not about PRs.
 check_api() {
-  local segment=$1 writes=0
-  [[ $segment =~ $write_re && ! $segment =~ $get_re ]] && writes=1
-  if [[ $segment =~ (mergePullRequest|enablePullRequestAutoMerge) ]] ||
-     { ((writes)) && [[ $segment =~ $api_merge_re ]]; }; then
-    ask "Approve merging this pull request."
-  fi
-  if [[ $segment =~ createPullRequest ]] || { ((writes)) && [[ $segment =~ $api_create_re ]]; }; then
-    ask "Approve opening this pull request."
-  fi
-  if [[ $segment =~ [[:space:]]graphql([[:space:]]|$) && $segment =~ $query_file_re ]]; then
-    ask "Approve this GraphQL call. Its query is in a file, so the hook cannot check for a PR merge or create."
-  fi
+  local s=" $1" m field=0 get=0
+  [[ $s =~ $graphql_re ]] && ask "Approve this GraphQL call. It can open or merge a pull request."
+  [[ $s =~ $field_re ]] && field=1
+  while [[ $s =~ $method_re ]]; do
+    m=${BASH_REMATCH[2]}
+    if [[ $m == [Gg][Ee][Tt] ]]; then
+      get=1
+    else
+      ask "Approve this gh api $m call. It can open or merge a pull request."
+    fi
+    s=${s#*"${BASH_REMATCH[0]}"}
+  done
+  ((field && !get)) && ask "Approve this gh api call. Its fields make it a POST, which can open or merge a pull request."
 }
 
 is_gh() {
@@ -95,18 +96,6 @@ is_gh() {
   norm "$1"
   NW=${NW##*[\(\`]}
   [[ ${NW##*/} == gh ]]
-}
-
-# Checks one `gh api` call: the words after `api` up to a nested command or the next `gh`.
-check_api_call() {
-  local -a call=()
-  local w
-  for w in "$@"; do
-    [[ $w == *'$('* || $w == *'`'* || $w == '('* ]] && break
-    is_gh "$w" && break
-    call+=("$w")
-  done
-  check_api " ${call[*]}"
 }
 
 check_segment() {
@@ -118,7 +107,7 @@ check_segment() {
     norm "${t[k + 1]}"
     case $NW in
       pr) check_pr "${t[@]:k+2}" ;;
-      api) check_api_call "${t[@]:k+2}" ;;
+      api) check_api "$segment" ;;
     esac
   done
 }
