@@ -28,11 +28,10 @@
 
 Order of precedence, from highest to lowest:
 
-1. Three git rules in [CLAUDE.md](CLAUDE.md). A project cannot override them.
-   - A human approves each commit and each new PR before Claude makes it.
-   - Claude does not commit directly to the default branch (usually `main`).
-   - Only a human merges a pull request. Claude never merges.
-2. My direct instructions to Claude in the session.
+1. Two git rules in [CLAUDE.md](CLAUDE.md). A project cannot override them.
+   - A human approves each commit, PR, and merge.
+   - Claude does not commit to the default branch (e.g., `main`).
+2. My instructions to Claude in a session.
 3. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
 4. My instructions in this repo:
    - `CLAUDE.md`.
@@ -104,17 +103,9 @@ The script needs `jq` on `PATH`.
 }
 ```
 
-The three git rules in `CLAUDE.md` are text that Claude can ignore.
-Two settings enforce them:
-
-- A deny rule blocks merges.
-- A hook blocks commits to the default branch and asks you to approve all other commits.
-
-Add this rule to `permissions.deny` in `~/.claude/settings.json`:
-
-```
-"Bash(gh pr merge:*)"
-```
+The two git rules in `CLAUDE.md` are text that Claude can ignore.
+A hook blocks commits to the default branch and asks you to approve all other commits.
+It covers only commits. PR and merge approval depend on the `CLAUDE.md` text.
 
 Add this entry to `hooks.PreToolUse` in `~/.claude/settings.json`.
 The hook needs `jq`.

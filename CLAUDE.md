@@ -1,10 +1,9 @@
 ## Non-negotiable
 
-These three rules apply even when a project says otherwise:
+These two rules apply even when a project says otherwise:
 
-- Get human approval before each commit and before each new PR, separately.
+- Get human approval separately before each commit, pull request, and merge.
 - Do not commit directly to the default branch (usually `main`).
-- Never merge. Humans merge.
 
 For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 
