@@ -3,31 +3,8 @@
 ## Observable Plot
 
 - For static charts and charts with hover only, use `@observablehq/plot`.
-  - It uses the same grammar as ggplot2: marks, scales, and facets.
-  - It makes an SVG, or a `<figure>` that holds the SVG when the chart has a title, subtitle, caption, or legend.
-  - Apply the color and text rules in `SKILL.md` to it.
-- Mount the chart in React:
-  - Call `Plot.plot()` in a `useEffect` hook.
-  - Append the result to a `useRef` element, and remove it in the cleanup function.
-- Make the chart fit its container.
-  - The default width is 640 px. The SVG shrinks to fit a narrow container, but it does not grow past that width.
-  - In the browser, read the container width with a `ResizeObserver` and give it to the `width` option.
-  - Run `Plot.plot()` again when the width changes.
-  - On the server, set `width` to the most common layout width.
-  - Make sure that the text stays readable at the smallest width, because the SVG scales the text too.
-  - If the text is too small, render a second, narrow chart for small screens, or render the chart in the browser.
-- For hover, use the `tip` mark or the `tip` mark option.
-  - The `tip` needs Plot to run in the browser.
-- For filters, keep the filter in React state and run `Plot.plot()` again with the filtered data.
-  - For brushed or linked views, use D3.
+  - It has the same grammar as ggplot2. Apply the color and text rules in `SKILL.md`.
 - For a static chart with fixed data, render the SVG on the server or at build time.
-  - Give a DOM, such as jsdom or linkedom, to the `document` option of `Plot.plot()`.
-  - The page then has no chart JavaScript.
-- For access, follow the rules in "Data and access" below.
-  - Set the `ariaLabel` and `ariaDescription` options of `Plot.plot()`.
-  - Plot does not add `role="img"`. Set it on the chart SVG.
-  - In a `<figure>`, a legend can add more SVGs before the chart. Select the chart with `figure.querySelector(":scope > svg:last-of-type")`.
-  - Do not set `role="img"` on the `<figure>`. That hides the SVG label, title, caption, and legend.
 
 ## plotly.js
 
