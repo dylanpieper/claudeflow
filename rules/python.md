@@ -46,7 +46,8 @@ When you build a web app with an API and a UI, use this stack.
 ## Layer separation
 
 In a web app, keep each layer distinct.
-Dependencies point down: a layer can use any layer below it and other modules in its own layer.
+Dependencies point down: a layer can use other modules in its own layer and the layers below it.
+Routes are the exception: they call services, not repositories.
 Never import from a layer above.
 
 | Layer | Owns | Keep out |
@@ -55,8 +56,10 @@ Never import from a layer above.
 | Routes | HTTP: parse, validate, call a service, return a response | Database queries and business rules |
 | Services | Business rules as plain functions | Web framework and HTTP details |
 | Repositories | All database queries | Business rules |
-| Models and migrations | Table definitions and migration history | Business rules; defaults, constraints, and validators are fine |
+| Models and migrations | Table definitions and migration history | Business rules |
 
+- Models can hold column defaults, database constraints, and field validators for data shape.
+  Put workflow and cross-entity rules in services.
 - API schemas are the shared contract.
   - Routes and services can import them.
   - Keep them separate from database models.
@@ -70,9 +73,7 @@ With this stack:
 
 - Frontend: React. Routes: FastAPI routers. Schemas: Pydantic.
 - Repositories: SQLAlchemy `select()` queries. Models: SQLAlchemy tables and Alembic history.
-- The one exception to the layer order: dependency providers in `api/deps.py`.
-  - They build repositories, sessions, and settings.
+- Build repositories, sessions, and settings only in the dependency providers in `api/deps.py`.
   - Route handlers get them with FastAPI `Depends` and give them to services.
-  - Handlers do not call repository methods.
   - Do not use global sessions.
 - Use this layout: `backend/app/{api,services,repositories,models,schemas}/` and `frontend/`.
