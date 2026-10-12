@@ -16,7 +16,7 @@ A project `CLAUDE.md` or `AGENTS.md` overrides this file.
 - Do not use `pip`, `poetry`, or `conda`.
 - Use `datar` and a fast backend (`datar-arrow`) as the default data wrangling tool
   - Do not use `numpy`, `pandas`, or `polars` unless already used
-  - `duckdb` is allowed as an alternative; suggest it for SQL-based work.
+  - `duckdb` and `pyarrow` are fine alternatives, for example for large data or SQL-based work.
 - Use `plotnine` as your default visualization tool
 - For spatial data and analysis, use the spatial skill. It allows `geopandas`.
 

@@ -56,13 +56,14 @@ Choosing a manager for a new project:
   - Air does not format code chunks in R Markdown or Quarto files.
 - Use `cli` for console output (e.g. `cli::cli_alert_success()`), not `cat()`, `message()`, or `print()`.
 - Clean column names with `janitor::clean_names()`.
-- For large data, use [`duckplyr`](https://duckplyr.tidyverse.org/) with `dplyr` verbs.
+- For large data, prefer [`duckplyr`](https://duckplyr.tidyverse.org/) with `dplyr` verbs. `arrow` is also fine.
   - Read files with `read_parquet_duckdb()` or `read_csv_duckdb()`, not into memory first.
   - Convert an existing data frame with `as_duckdb_tibble()`.
   - Write results with `compute_parquet()`.
   - Do not use the deprecated `df_from_*()` or `as_duckplyr_tibble()`.
 - Alternatively, use `dplyr` with a `duckdb` connection, for example on an existing `.duckdb` database.
-  - Connect with `DBI::dbConnect(duckdb::duckdb(), dbdir)` and query with `tbl(con, "table")`. `dbplyr` translates the verbs to SQL.
+  - Connect with `DBI::dbConnect(duckdb::duckdb(), dbdir = path)` and query with `tbl(con, "table")`.
+  - `dbplyr` translates the verbs to SQL. Add `dbplyr`, `DBI`, and `duckdb` to the project dependencies.
   - Call `collect()` only for results that fit in memory.
   - Close the connection with `DBI::dbDisconnect(con)`.
 - For figures, maps, and tables, use the viz skill.
