@@ -5,7 +5,7 @@ My Claude Code setup.
 ```
 👤 request → 🤖 branch → 🤖 change → 👤 commit → 🤖 review → 👤 PR → 👤 merge
                               ▲                      │
-                              └──── fail ────────────┘
+                              └──────── fail ────────┘
 ```
 
 👤 A human acts. 🤖 Claude acts.
