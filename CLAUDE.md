@@ -46,7 +46,8 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - If you are on the base branch, or the change is unrelated:
     `git fetch origin`, then `git switch --no-track -c <short-name> origin/<base>`.
   - The base branch is the default branch, unless the conventions name a different branch.
-- Open each PR against the base branch. Do not stack a PR on another feature branch.
+- Open each PR against the base branch.
+  - Do not stack a PR on another feature branch.
   - If new work depends on an open PR, ask me: add it to that PR, or wait until it merges.
 - On the first push, run `git push -u origin <short-name>`.
 - Use plain branches in the current checkout, not git worktrees.
