@@ -49,6 +49,11 @@ Choosing a manager for a new project:
 - Use `rix` when every OS must get the same R version and system libraries.
 - Use `ir` for a standalone script or Quarto document outside any managed project; it needs no lockfile or project directory.
 
+## Paths
+
+- Build project paths with `here::here()`. Do not use `setwd()` or paths relative to the working directory.
+- Use `fs` for file and directory work (`fs::path()`, `fs::dir_ls()`, `fs::dir_create()`), not base `file.path()`, `list.files()`, or `dir.create()`.
+
 ## Tools
 
 - Format every `.R` file after writing or changing it.
@@ -76,7 +81,7 @@ For complex projects:
 | Need | Tool |
 |------|------|
 | Packages and R version | `renv`, `rig` |
-| Paths and settings | `here`, `config` |
+| Paths and settings | `here`, `fs`, `config` |
 | Data versioning | `pins` |
 | Modules and pipelines | `box`, `targets` |
 | Logging and profiling | `logger`, `profvis` |

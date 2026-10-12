@@ -20,6 +20,14 @@ A project `CLAUDE.md` or `AGENTS.md` overrides this file.
 - Use `plotnine` as your default visualization tool
 - For spatial data and analysis, use the spatial skill. It allows `geopandas`.
 
+## Paths
+
+- Use `pathlib.Path` for paths and file work. Do not use `os.path`, `os.chdir()`, or string paths.
+- Use `shutil` for recursive copy, move, and delete.
+- Anchor project paths to the code, not the working directory: `Path(__file__).resolve().parent`.
+- Read data files shipped inside a package with `importlib.resources.files()`.
+- Put user config, cache, and data files in the directories from `platformdirs`.
+
 ## Web app stack
 
 When you build a web app with an API and a UI, use this stack.
