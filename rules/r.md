@@ -84,15 +84,17 @@ For complex projects:
 
 ### Layout
 
-- `R/`: functions. All logic lives here; scripts and the pipeline only call them.
-- `_targets.R`: the pipeline.
+- `box/`: `box` modules with the project's functions. Scripts and apps only call them.
 - `config.yml`: settings.
 - `data-dict.yaml`: the data contract.
+- With `targets`:
+  - `_targets.R`: the pipeline.
+  - `R/`: pipeline functions, loaded with `tar_source()`. Do not put `box` modules here.
+  - `targets` does not track changes inside `box` modules.
 
 ### Modules
 
-- In analysis projects and apps, put reusable code in `box` modules.
-- If you use `targets`, keep pipeline functions in `R/` for `tar_source()`. `targets` does not track changes inside `box` modules.
+- In analysis projects and apps, put reusable code in `box` modules in `box/`.
 - `box::use()` caches modules for the whole R session. After editing a module, restart R or call `box::reload()` before running tests.
 
 ### Apps
