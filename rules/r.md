@@ -22,6 +22,10 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 ## Package management
 
 - If a project already uses another package manager, such as `rv`, `uvr`, `rix`, or `ir`, use it. Do not add a second one.
+  - Follow that tool's documentation to add a package.
+  - With `rix`, never edit `default.nix` by hand. Rerun `rix::rix(overwrite = TRUE)`.
+- If the project has no package manager, ask before you run `renv::init()`. Until then, use `pak::pak()`.
+- In an R package, declare dependencies in `DESCRIPTION` with `usethis::use_package()`. Use `renv` or `pak` only to install them.
 - Use [`renv`](https://rstudio.github.io/renv/) for project packages.
   - To add a package: `renv::install()`, then `renv::snapshot()`.
   - To make `renv` use pak, add `options(renv.config.pak.enabled = TRUE)` to the project `.Rprofile`, before `source("renv/activate.R")`.
