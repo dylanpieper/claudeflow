@@ -62,7 +62,7 @@ Read each file. List each claim that can become outdated, with its `file:line`:
 - Create a branch named `audit-<YYYY-MM-DD>` from the latest `origin/main`.
 - If that branch exists, add a suffix such as `-2`.
 - Fix only the outdated claims and the conflicts. Keep the wording style of each file.
-- Follow the git workflow in `CLAUDE.md` and `rules/roborev.md`:
+- Follow the "Git and PRs" rules in `CLAUDE.md` and `rules/roborev.md`:
   - Get my review before you commit.
   - Handle failing reviews (fix or disprove each one) before the pull request.
 - Open a pull request that includes the table.

@@ -223,10 +223,11 @@ claude plugin install slidecrafting@slidecrafting
 
 ### 6. Command-line tools the rules call
 
-`CLAUDE.md` calls [data-dict](https://github.com/tidyverse/data-dict).
+`CLAUDE.md` calls [gh](https://cli.github.com/) and [data-dict](https://github.com/tidyverse/data-dict).
 `rules/r.md` calls [Air](https://posit-dev.github.io/air/).
 
 ```
+brew install gh
 uv tool install data-dict-yaml
 uv tool install air-formatter
 ```

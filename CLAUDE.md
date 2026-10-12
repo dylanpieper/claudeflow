@@ -1,90 +1,80 @@
-## Design
+## Non-negotiable
 
-- Design modern systems that are minimal, modular, and reusable.
-- Divide work into units that each have a clear purpose: modules, functions, and pipeline steps.
-- Give each unit a clear contract: its inputs, outputs, and errors.
-- Make units small, but do not divide a unit that does one clear task.
-- Put validation and error handling in the small units.
-- Make high-level functions thin wrappers that combine small units.
-- Do not use one example as the source of truth.
-  - Find, list, and test all examples that apply.
-  - Challenge and test your assumptions.
+These three rules apply even when a project says otherwise:
 
-## Cognitive load
+- Get human approval before each commit and before each new PR, separately.
+- Do not commit directly to the default branch (usually `main`).
+- Never merge. Humans merge.
 
-- Design for working memory.
-  - Use about five to seven items in a single chunk of information.
-  - Put larger chunks into groups.
-- Use the rule of three in sentences and examples.
-  - Group words, examples, and points in threes when the content allows it.
-  - Three items seem complete and are easy to remember.
+For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 
-## Writing
+## Shell
 
-- Write in ASD-STE100 Simplified Technical English for technical writing and documentation.
-- Communicate requirements, environments, and packages clearly in documentation.
-- In code comments and project documents, describe the result.
-  - Do not repeat information that the code shows clearly.
-  - Do not add text that gives no new information.
-- In documents, do not put comments in code blocks. Tell the story and the outcome in the text around the block.
-- Keep lines short in Markdown files.
-  - Split a long list item into a short lead line and sub-items.
-  - Put each sentence of a long item in its own sub-item.
-- Use a bulleted list only for two or more items.
-  - Do not put a single bullet under a heading or a parent item.
-  - Write one item as a sentence.
-- Keep a change log and release versions for published work that continues to change. Skip this for a prototype.
-
-## Shell conventions
-
-- The shell starts in the project root. Do not use `cd` to go to the current directory.
-- Use `cd` only when the target is a different directory.
+- The shell starts in the project root.
+- Use `cd` only to go to a different directory.
 - Use absolute paths with `git`. Do not use `cd` before `git`.
-- Write temporary test and analysis scripts to the session scratchpad directory.
-- Run each script by its literal path: `python3 <scratchpad>/probe_x.py` or `Rscript <scratchpad>/probe_x.R`.
+- Write temporary scripts to the session scratchpad directory.
+- Run each script by its literal path: `python3 <scratchpad>/probe_x.py`.
 - Do not use inline code (`python3 -c`, `Rscript -e`).
 - Do not make paths from shell variables.
 
-## Workspace conventions
+## Git and PRs
 
-- Three rules always apply, even when a project says otherwise:
-  - Get a human approval before each commit and before each new PR.
-  - Do not commit directly to the default branch (usually "main").
-  - Never merge. Humans merge.
-- Except for these three rules, a project `AGENTS.md` or `CLAUDE.md` overrides my rules.
-- Before the first commit or PR in a repository, read its `CONTRIBUTING.md`, recent commit messages, and branch names.
-  - If the repository has no `CONTRIBUTING.md`, look in the owner's `.github` repository.
-  - For the base branch, branch names, commit messages, and PR format, follow these conventions.
-  - Where the conventions say nothing, use my Git workflow.
-- If the repository or its owner has a PR template, use its sections in the PR description.
-  - `gh pr create --body` does not apply the template.
-  - Put the template sections in the body yourself.
-- Do the steps that the conventions require, for example a draft PR or a statement of how AI helped.
-
-## Git workflow
-
-Branches:
-
-- Use one branch for one purpose. Do not add unrelated changes to the current branch or its PR.
-- Before any change, compare it with the purpose of the current branch: its name, commits, and open PR.
-  - If the current branch is the base branch, or the change is not related:
-    - Run `git fetch origin`.
-    - Create a new branch from the remote base branch: `git switch --no-track -c <short-name> origin/<base>`.
+- Before the first commit or PR in a repository, read its conventions:
+  - `README.md` and `CONTRIBUTING.md`.
+  - Recent commit messages and branch names.
+  - The PR template, if one exists.
+- Then read the owner's organization-wide conventions with `gh`, if they exist:
+  - The practices repository:
+    - Use the one that the README or `CONTRIBUTING.md` names as its practices guide.
+    - If none is named, check `<owner>/practices`.
+    - List its files. Read the files on Git, PRs, and versions.
+  - The `.github` repository:
+    - Use its `CONTRIBUTING.md` if the current repository has none.
+    - Use its PR template if the current repository has none.
+- Order of precedence, highest first:
+  - Repository conventions.
+  - The practices repository.
+  - The `.github` files.
+  - The fallback rules below.
+- Follow the conventions for base branch, branch names, commits, and PR format.
+  - Do the steps they require, for example a draft PR or an AI-use statement.
+  - Where they say nothing, use the rules below.
+- `gh pr create --body` does not apply the PR template; write the body yourself.
+- Use one branch for one purpose.
+  - Before a change, compare it with the branch name, commits, and open PR.
+  - If you are on the base branch, or the change is unrelated:
+    `git fetch origin`, then `git switch --no-track -c <short-name> origin/<base>`.
   - The base branch is the default branch, unless the conventions name a different branch.
-- On the first push of a branch, set its upstream: `git push -u origin <short-name>`.
+- On the first push, run `git push -u origin <short-name>`.
 - Use plain branches in the current checkout, not git worktrees.
-
-Commits and PRs:
-
 - Commit in small, logical steps with clear messages.
-- When the work is done, show the PR title and description, and ask for approval.
-  - Open the PR with `gh pr create` only after a human approves it.
-  - An approval of a commit is not an approval of a PR.
-- Before you open or update a PR, make sure that each commit on the branch agrees with the PR purpose.
+- When the work is done, show the PR title and description and ask for approval.
+- Before you open or update a PR, make sure each commit fits the PR purpose.
 - In the PR description, tell what changed and why.
 - If no automated test covers a change, tell in the PR:
-  - How you verified the change.
-  - How another person can reproduce your verification.
+  - How you verified it.
+  - How another person can reproduce the verification.
+
+## Design
+
+- Do not use one example as the source of truth.
+- Find, list, and test all representative examples that apply.
+- Give each function or pipeline step one task and a contract: inputs, outputs, errors.
+- Put validation and error handling in the small units.
+- Keep high-level functions as thin wrappers.
+
+## Writing
+
+- Write documentation in ASD-STE100 Simplified Technical English.
+- In docs, state the requirements, environment, and package versions.
+- In comments and docs, describe the result. Do not repeat what the code shows.
+- In documents, do not put comments in code blocks.
+- Explain the outcome in the text around a code block.
+- In Markdown, keep lines short.
+  - Split a long item into a short lead line and sub-items.
+  - Use a list only for two or more items. Write one item as a sentence.
+- Keep a change log and release versions for published work; skip for a prototype.
 
 ## Data stack
 
@@ -116,15 +106,15 @@ Commits and PRs:
 
 ## Libraries and tools
 
-- Before you first use a third-party package, library, or CLI, read its current documentation, news, and change log.
-- Find the version that the project uses in its lockfile or manifest.
-  - Examples: `renv.lock`, `rv.lock`, `uvr.lock`, `DESCRIPTION`, `uv.lock`, `pyproject.toml`, `package-lock.json`.
-  - If there is none, use the installed version (`--version`, `packageVersion()`, or `importlib.metadata.version()`).
-  - Read the documentation for that version.
-- Look for new features, deprecated functions, and changed defaults. Use the current recommended method.
+- Before you first use a third-party package or CLI in a project, find its version.
+  - Look in the lockfile or manifest.
+  - If there is none, use the installed version.
+- Read the documentation and change log for that version.
+- Use the current recommended method, not deprecated functions or old defaults.
 
-## Languages
+## Rule files
 
-- `~/.claude/rules/r.md` loads only after you read an R file.
-- `~/.claude/rules/python.md` loads only after you read a Python or frontend file.
-- In a project with no files in that language yet, read the rule file before you write code.
+- These load only after you read a matching file:
+  - `~/.claude/rules/r.md`: R files.
+  - `~/.claude/rules/python.md`: Python or frontend files.
+- In a project with no matching files yet, read the rule file before you write code.
