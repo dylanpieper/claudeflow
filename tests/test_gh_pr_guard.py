@@ -116,6 +116,12 @@ def test_graphql_query_from_file_asks(command):
         "gh api -X PUT -f commit_title='fix a|b' repos/o/r/pulls/7/merge",
         "gh api -f title='A & B' repos/o/r/pulls -f head=x",
         "git commit -m \"$(cat <<'EOF'\nIt's done\nEOF\n)\"\ngh pr merge 5",
+        "\\gh pr create --fill",
+        "\"gh\" pr merge 5",
+        "gh \"pr\" merge 5",
+        "gh pr 'create' --fill",
+        "(gh pr merge)",
+        "gh api -X PUT repos/o/r/pulls/7/merge -f sha=\"$(gh api -X GET repos/o/r/pulls/7 --jq .head.sha)\"",
     ],
 )
 def test_gh_in_any_position_asks(command):
@@ -142,3 +148,15 @@ def test_missing_jq_asks_for_gh_commands():
 
 def test_missing_jq_passes_other_commands():
     assert run_without_jq("ls") == ""
+
+
+def test_missing_jq_ignores_gh_in_other_fields():
+    result = subprocess.run(
+        [BASH, str(SCRIPT)],
+        input=json.dumps({"tool_input": {"command": "ls"}, "cwd": "/Users/me/github/proj"}),
+        capture_output=True,
+        text=True,
+        env={"PATH": "/nonexistent"},
+        check=True,
+    )
+    assert result.stdout == ""

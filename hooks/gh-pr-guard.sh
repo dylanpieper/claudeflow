@@ -16,7 +16,8 @@ ask() {
 
 input=$(</dev/stdin)
 if ! command -v jq >/dev/null; then
-  [[ $input == *gh* ]] && ask "gh-pr-guard cannot check this command because jq is not on PATH."
+  raw_re='"command"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*gh'
+  [[ $input =~ $raw_re ]] && ask "gh-pr-guard cannot check this command because jq is not on PATH."
   exit 0
 fi
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
@@ -50,8 +51,17 @@ api_merge_re='pulls/[^[:space:]/]+/merge([^[:alnum:]_/]|$)'
 api_create_re="repos/[^[:space:]]+/pulls([[:space:]\"'?]|$)"
 query_file_re='[[:space:]](--input|(-F|--field)[[:space:]=]*query=@)'
 
+# Sets NW to word $1 without quotes, leading ( { ! $ backtick backslash, and trailing ) } ; backtick.
+norm() {
+  NW=${1//[\"\']/}
+  while [[ $NW == [\(\{\!\$\`\\]* ]]; do NW=${NW:1}; done
+  while [[ $NW == *[\)\}\;\`] ]]; do NW=${NW%?}; done
+}
+
 check_pr() {
-  local -a t=("$@")
+  local -a t=()
+  local w
+  for w in "$@"; do norm "$w"; t+=("$NW"); done
   local i=0 n=${#t[@]}
   while ((i < n)) && [[ ${t[i]} == -* ]]; do
     case ${t[i]} in
@@ -80,18 +90,35 @@ check_api() {
   fi
 }
 
+is_gh() {
+  [[ $1 == *gh* ]] || return 1
+  norm "$1"
+  NW=${NW##*[\(\`]}
+  [[ ${NW##*/} == gh ]]
+}
+
+# Checks one `gh api` call: the words after `api` up to a nested command or the next `gh`.
+check_api_call() {
+  local -a call=()
+  local w
+  for w in "$@"; do
+    [[ $w == *'$('* || $w == *'`'* || $w == '('* ]] && break
+    is_gh "$w" && break
+    call+=("$w")
+  done
+  check_api " ${call[*]}"
+}
+
 check_segment() {
-  local segment=$1 k w
+  local segment=$1 k
   local -a t
   read -ra t <<<"$segment"
   for ((k = 0; k < ${#t[@]}; k++)); do
-    w=${t[k]}
-    [[ $w == *gh ]] || continue
-    while [[ $w == [\(\{\!\$\`\"\']* ]]; do w=${w:1}; done
-    [[ ${w##*/} == gh ]] || continue
-    case ${t[k + 1]} in
+    is_gh "${t[k]}" || continue
+    norm "${t[k + 1]}"
+    case $NW in
       pr) check_pr "${t[@]:k+2}" ;;
-      api) check_api "$segment" ;;
+      api) check_api_call "${t[@]:k+2}" ;;
     esac
   done
 }
