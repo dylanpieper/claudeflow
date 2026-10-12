@@ -29,7 +29,8 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
     - Use the one that the README or `CONTRIBUTING.md` names as its practices guide.
     - If none is named, check `<owner>/practices`.
     - List its files. Read the files on Git, PRs, and versions.
-  - The `.github` repository: use its `CONTRIBUTING.md` or PR template for each file that the repository does not have.
+  - The `.github` repository:
+    - Use its `CONTRIBUTING.md` or PR template for each file that the repository does not have.
 - Order of precedence, highest first:
   - Repository conventions.
   - The practices repository.
