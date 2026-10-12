@@ -265,3 +265,56 @@ def test_missing_jq_ignores_git_in_the_cwd(tmp_path):
     cwd = tmp_path / "github" / "proj"
     cwd.mkdir(parents=True)
     assert run_without_jq("ls", cwd) == ""
+
+
+@pytest.fixture
+def branches(tmp_path):
+    """A repo on main with a merged branch `done` and an unmerged branch `wip`, both also on origin."""
+    repo = make_repo(tmp_path / "branches")
+    git(repo, "branch", "done")
+    git(repo, "update-ref", "refs/remotes/origin/done", "refs/heads/done")
+    git(repo, "switch", "-q", "-c", "wip")
+    git(repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "wip")
+    git(repo, "update-ref", "refs/remotes/origin/wip", "refs/heads/wip")
+    git(repo, "switch", "-q", "main")
+    return repo
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git branch -d done",
+        "git branch -D done",
+        "git branch --delete --force done",
+        "git push origin --delete done",
+        "git push origin -d done",
+        "git push origin :done",
+        "git branch -dr origin/wip",
+    ],
+)
+def test_deleting_a_merged_branch_passes(branches, command):
+    assert decision(command, branches) is None
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git branch -d wip",
+        "git branch -D wip",
+        "git branch -D done wip",
+        "git push origin --delete wip",
+        "git push origin :wip",
+        "git push origin --delete gone",
+        "git branch -D gone",
+        "git branch -D main",
+        "git push origin --delete main",
+        "git push origin :main",
+    ],
+)
+def test_deleting_an_unmerged_or_default_branch_asks(branches, command):
+    assert decision(command, branches) == "ask"
+
+
+def test_branch_without_delete_passes(branches):
+    assert decision("git branch -m done finished", branches) is None
+    assert decision("git branch new-work", branches) is None

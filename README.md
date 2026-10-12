@@ -27,7 +27,8 @@ My Claude Code setup.
 - [hooks/](hooks/): approval guards.
   - `git-commit-guard.sh` blocks commits to the default branch and asks before all other commits.
   - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
-  - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch.
+  - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch,
+    and before each deletion of a branch that is not merged.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
 ## Install
