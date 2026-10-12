@@ -133,7 +133,11 @@ check_git() {
       --abort | --quit) return 0 ;;
       --all | --mirror) all=1 ;;
       --tags) tags=1 ;;
-      -*) [[ ${t[i]} =~ $value_opt_re ]] && ((i++)) ;;
+      -*)
+        if [[ ${t[i]} =~ $value_opt_re || ($sub == push && ${t[i]} == --recurse-submodules) ]]; then
+          ((i++))
+        fi
+        ;;
       *) pos+=("$(unquote "${t[i]}")") ;;
     esac
     ((i++))

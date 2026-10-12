@@ -211,8 +211,13 @@ def test_work_tree_does_not_change_the_repo(on_main, on_feature):
     assert decision(f"git --work-tree {on_feature} merge feature", on_main) == "ask"
 
 
-def test_recurse_submodules_takes_no_separate_value(on_main):
+def test_pull_recurse_submodules_takes_no_separate_value(on_main):
     assert decision("git pull --recurse-submodules origin feature", on_main) == "ask"
+
+
+def test_push_recurse_submodules_takes_a_value(tmp_path):
+    repo = make_repo(tmp_path / "trunk", default="trunk", checkout="feature")
+    assert decision("git push --recurse-submodules on-demand origin trunk", repo) == "ask"
 
 
 def test_cd_in_backticks_stays_in_backticks(on_main, on_feature):
@@ -224,7 +229,7 @@ def test_quote_in_branch_name_gives_valid_json(on_main):
 
 
 @pytest.mark.parametrize("flag", ["--git-dir {repo}/.git", "--git-dir={repo}/.git"])
-def test_git_dir_and_work_tree_set_the_repo(on_main, on_feature, flag):
+def test_git_dir_sets_the_repo(on_main, on_feature, flag):
     assert decision(f"git {flag.format(repo=on_main)} merge feature", on_feature) == "ask"
     assert decision(f"git {flag.format(repo=on_feature)} merge main", on_main) is None
 
