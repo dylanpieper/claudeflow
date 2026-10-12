@@ -89,7 +89,8 @@ For complex projects:
 
 ### Modules
 
-- Use `box` for module development; never write long, monolithic scripts.
+- In analysis projects and apps, put reusable code in `box` modules.
+- If you use `targets`, keep pipeline functions in `R/` for `tar_source()`. `targets` does not track changes inside `box` modules.
 - `box::use()` caches modules for the whole R session. After editing a module, restart R or call `box::reload()` before running tests.
 
 ### Apps
