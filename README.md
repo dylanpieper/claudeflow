@@ -24,18 +24,19 @@ My Claude Code setup.
 - [CLAUDE.md](CLAUDE.md): rules for every session.
 - [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
 - [skills/](skills/): research-writing, viz, spatial, and audit-instructions.
-- [hooks/](hooks/): approval guards.
+- [hooks/](hooks/): approval guards and a Markdown check.
   - `git-commit-guard.sh` blocks commits to the default branch and asks before all other commits.
   - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
   - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch,
     and before each deletion of a branch that is not merged.
+  - `md-list-check.sh` sends each one-item list or sub-list in a changed Markdown file back to Claude.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
 ## Install
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh \
+for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh hooks/md-list-check.sh \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,spatial,audit-instructions,viz}/SKILL.md \
   skills/viz/references/{r,grammar-style,python,web,maps}.md; do
@@ -64,6 +65,12 @@ The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude
           { "type": "command", "command": "$HOME/.claude/hooks/gh-pr-guard.sh", "timeout": 10 },
           { "type": "command", "command": "$HOME/.claude/hooks/git-merge-guard.sh", "timeout": 10 }
         ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": "$HOME/.claude/hooks/md-list-check.sh", "timeout": 10 }]
       }
     ]
   },

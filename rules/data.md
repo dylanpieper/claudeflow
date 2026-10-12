@@ -27,9 +27,8 @@ A project `CLAUDE.md` or `AGENTS.md` overrides this file.
 ## Data dictionaries
 
 - Read CSV or Excel files from a file list. Do not rely on exact filenames.
-  - Check the schema before you assign data to variables.
-- When a project relies on data files, describe them in `data-dict.yaml`.
-  - It is the data contract.
+- Check the schema before you assign data to variables.
+- When a project relies on data files, describe them in `data-dict.yaml`. It is the data contract.
 - Run the `data-dict` skill commands first:
   - `data-dict skill-read` before you read a dictionary.
   - `data-dict skill-create` before you create or change one.

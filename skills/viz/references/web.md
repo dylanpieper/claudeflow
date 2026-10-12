@@ -3,7 +3,7 @@
 ## Observable Plot
 
 - For static charts and charts with hover only, use `@observablehq/plot`.
-  - It has the same grammar as ggplot2. Apply the color and text rules in `SKILL.md`.
+- Apply the color and text rules in `SKILL.md` to Plot charts.
 - For a static chart with fixed data, render the SVG on the server or at build time.
 
 ## plotly.js
