@@ -46,28 +46,33 @@ When you build a web app with an API and a UI, use this stack.
 ## Layer separation
 
 In a web app, keep each layer distinct.
-A layer calls only the layer below it.
+Dependencies point down: a layer can use any layer below it and other modules in its own layer.
 Never import from a layer above.
 
-| Layer | Owns | Must not |
+| Layer | Owns | Keep out |
 |-------|------|----------|
-| Frontend (React or Vite) | UI, client state, HTTP calls to the API | Contain business rules or touch the database |
-| Routes (FastAPI routers) | HTTP: parse, validate, call a service, return a response | Contain SQL or business rules |
-| Services | Business rules as plain functions | Import FastAPI or know about HTTP |
-| Repositories | All SQLAlchemy queries | Contain business rules |
-| Models and migrations | SQLAlchemy tables and Alembic history | Contain logic |
+| Frontend | UI, client state, HTTP calls to the API | Business rules and database access |
+| Routes | HTTP: parse, validate, call a service, return a response | Database queries and business rules |
+| Services | Business rules as plain functions | Web framework and HTTP details |
+| Repositories | All database queries | Business rules |
+| Models and migrations | Table definitions and migration history | Business rules; defaults, constraints, and validators are fine |
 
-- Pydantic schemas are the shared API contract.
+- API schemas are the shared contract.
   - Routes and services can import them.
-  - Keep them separate from SQLAlchemy models.
+  - Keep them separate from database models.
   - Map between the two in the service layer.
 - A service gets its repository as an argument.
+- Test each layer alone.
+  - Test services with a fake repository.
+  - Test repositories against a real test database of the same engine.
+
+With this stack:
+
+- Frontend: React. Routes: FastAPI routers. Schemas: Pydantic.
+- Repositories: SQLAlchemy `select()` queries. Models: SQLAlchemy tables and Alembic history.
 - The one exception to the layer order: dependency providers in `api/deps.py`.
   - They build repositories, sessions, and settings.
   - Route handlers get them with FastAPI `Depends` and give them to services.
   - Handlers do not call repository methods.
   - Do not use global sessions.
 - Use this layout: `backend/app/{api,services,repositories,models,schemas}/` and `frontend/`.
-- Test each layer alone.
-  - Test services with a fake repository.
-  - Test repositories against a real PostgreSQL test database.
