@@ -2,7 +2,7 @@
 
 ## Observable Plot
 
-- For static charts and charts with hover only, use `@observablehq/plot`. Like ggplot2, it layers marks with scales and facets.
+- For static charts and charts with hover only, use `@observablehq/plot`.
 - Apply the color and text rules in `SKILL.md` to Plot charts.
 - For a static chart with fixed data, render the SVG on the server or at build time.
 
