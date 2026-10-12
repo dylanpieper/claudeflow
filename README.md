@@ -43,17 +43,19 @@ Order of precedence, from highest to lowest:
 
 Hooks and permission settings always apply. No instruction file can override them.
 
-- **[CLAUDE.md](CLAUDE.md)**: Rules for every session (e.g., one purpose for each branch and PR).
+- **[CLAUDE.md](CLAUDE.md)**: My rules for every session.
 - **[rules/roborev.md](rules/roborev.md)**: How Claude uses roborev to review or fix commits before opening a PR.
 - **[hooks/git-commit-guard.sh](hooks/git-commit-guard.sh)**: Blocks commits to the default branch and asks you to approve all other commits.
 - **[statusline.sh](statusline.sh)**: Status line with model, folder, caveman mode, context use, and 5-hour and 7-day plan use.
 - **[research-writing](skills/research-writing/SKILL.md)**: APA 7 and open-science rules.
 - **[viz](skills/viz/SKILL.md)**: Rules for figures, charts, maps, and tables, and how to choose a tool.
 - **[spatial](skills/spatial/SKILL.md)**: Rules for Census data, distance, travel time, and spatial clusters.
-- **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to check for outdated instructions and open a PR with fixes.
-- **[rules/r.md](rules/r.md)**: R preferences. Loads only for R files.
-- **[rules/python.md](rules/python.md)**: Python and frontend preferences. Loads only for Python and frontend files.
-- **[rules/data.md](rules/data.md)**: Data stack and data dictionary rules. Loads for data files, `data-dict.yaml`, and R, Python, notebook, Quarto, or SQL files.
+- **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to fix outdated instructions in a PR.
+- **[rules/r.md](rules/r.md)**: R preferences.
+- **[rules/python.md](rules/python.md)**: Python and frontend preferences.
+- **[rules/data.md](rules/data.md)**: Data stack and data dictionary rules.
+
+The R, Python, and data rule files load only for the files that match their `paths:` frontmatter.
 
 ## Installed tools
 
