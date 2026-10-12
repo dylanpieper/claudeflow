@@ -63,6 +63,7 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - Give each function or pipeline step one task and a contract: inputs, outputs, errors.
 - Put validation and error handling in the small units.
 - Keep high-level functions as thin wrappers.
+- Use real data at runtime when it is available. Do not hardcode data or fixes.
 
 ## Writing
 
@@ -75,34 +76,6 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - Split a long item into a short lead line and sub-items.
   - Use a list only for two or more items. Write one item as a sentence.
 - Keep a change log and release versions for published work; skip for a prototype.
-
-## Data stack
-
-- Recommend a modern data stack. Show alternatives and put them in order of best fit.
-- Use real data at runtime when it is available. Do not hardcode data or fixes.
-- As a general rule:
-  - Large or heavy work: when a task needs power, memory, or storage, use DuckDB.
-    - Use Arrow or Parquet with DuckDB as necessary.
-    - DuckDB is best for large column scans and aggregations.
-    - DuckLake is best for data lakes, cataloging, and multiple clients (local or cloud)
-    - Use the `duckdb-skills` plugin.
-  - Small persistent data: when small data needs transactions or many small row reads and writes, use SQLite.
-
-## Data dictionaries
-
-- Read multiple CSV or Excel files from a file list. Do not rely on exact filenames.
-  - Before you assign data to variables, check its schema.
-  - If there is a dictionary, check the data against it.
-- When a project relies on data files, describe them in `data-dict.yaml`. Use it as the data contract.
-- Run the `data-dict` skill commands first:
-  - Before you read a dictionary, run `data-dict skill-read`.
-  - Before you create or change a dictionary, run `data-dict skill-create`.
-- Write code that continues to work when data files, connections, or schemas change.
-- When the data and the dictionary do not agree, warn loudly.
-- Check the data with `data-dict`:
-  - For Parquet, use `data-dict validate-meta` and `data-dict validate-data`.
-  - For other sources, use `data-dict translate` to get the checks in R, Python, or SQL.
-- If `data-dict` is not available, tell me. Then check the schemas in code.
 
 ## Libraries and tools
 
@@ -117,4 +90,5 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - These load only after you read a matching file:
   - `~/.claude/rules/r.md`: R files.
   - `~/.claude/rules/python.md`: Python or frontend files.
+  - `~/.claude/rules/data.md`: data files, `data-dict.yaml`, and R, Python, notebook, Quarto, or SQL files.
 - In a project with no matching files yet, read the rule file before you write code.
