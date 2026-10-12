@@ -5,6 +5,11 @@
 #   `git pull` of a different branch into the default branch,
 #   `git push` that updates the default branch on the remote.
 # Other commands get no decision.
+# Limits: the hook reads the command text only.
+# It follows `cd <dir>` and `git -C <dir>`, but it does not see into `bash -c` strings,
+# git or shell aliases, or scripts.
+
+command -v jq >/dev/null || { echo "git-merge-guard: jq is not on PATH, so the guard is off." >&2; exit 1; }
 
 input=$(cat)
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
@@ -41,55 +46,78 @@ unquote() {
   echo "${s%[\"\']}"
 }
 
+resolve() {
+  local p
+  p=$(unquote "$1")
+  p=${p/#\~/$HOME}
+  [[ $p = /* ]] || p=$dir/$p
+  echo "$p"
+}
+
+# Options of merge, pull, and push that take their value as the next word.
+value_opt_re='^(-o|--push-option|--repo|--receive-pack|--exec|-m|-F|--file|-s|--strategy|-X|--strategy-option|--into-name|--depth|--deepen|--shallow-since|--shallow-exclude|--upload-pack)$'
+
+dir=$cwd
+
 check_segment() {
   local -a t
   read -ra t <<<"$1"
-  local i=0 n=${#t[@]} repo=$cwd
+  local i=0 n=${#t[@]}
 
-  while ((i < n)) && [[ ${t[i]} == *=* && ${t[i]} != -* ]]; do ((i++)); done
+  if [[ ${t[0]} == cd ]]; then
+    ((n > 1)) && dir=$(resolve "${t[1]}")
+    return 0
+  fi
+
+  while ((i < n)) && [[ ${t[i]} == *=* && ${t[i]} != -* || ${t[i]} =~ ^(env|command|exec|time|nohup)$ ]]; do
+    ((i++))
+  done
   ((i < n)) && [[ ${t[i]##*/} == git ]] || return 0
   ((i++))
+
+  local repo=$dir
   while ((i < n)); do
     case ${t[i]} in
-      -C) repo=$(unquote "${t[i+1]}"); ((i += 2)) ;;
+      -C) repo=$(resolve "${t[i+1]}"); ((i += 2)) ;;
       -c) ((i += 2)) ;;
       -*) ((i++)) ;;
       *) break ;;
     esac
   done
   ((i < n)) || return 0
-  repo=${repo/#\~/$HOME}
-  [[ $repo = /* ]] || repo=$cwd/$repo
 
   local sub=${t[i]}
-  local -a args=("${t[@]:i+1}") pos=()
-  local a all=0 tags=0
-  for a in "${args[@]}"; do
-    case $a in
+  ((i++))
+  local -a pos=()
+  local all=0 tags=0
+  while ((i < n)); do
+    case ${t[i]} in
       --abort | --quit) return 0 ;;
       --all | --mirror) all=1 ;;
       --tags) tags=1 ;;
-      -*) ;;
-      *) pos+=("$(unquote "$a")") ;;
+      -*) [[ ${t[i]} =~ $value_opt_re ]] && ((i++)) ;;
+      *) pos+=("$(unquote "${t[i]}")") ;;
     esac
+    ((i++))
   done
 
+  git -C "$repo" rev-parse --git-dir >/dev/null 2>&1 || return 0
   local branch
   branch=$(git -C "$repo" branch --show-current 2>/dev/null)
-  [[ -n $branch ]] || return 0
 
   local remote=${pos[0]:-origin} spec dst
   case $sub in
     merge)
-      is_default "$repo" origin "$branch" &&
+      [[ -n $branch ]] && is_default "$repo" origin "$branch" &&
         decide "Approve this merge into the default branch ($branch)."
       ;;
     pull)
+      [[ -n $branch ]] && is_default "$repo" "$remote" "$branch" || return 0
       for spec in "${pos[@]:1}"; do
         spec=${spec#+}
         spec=${spec%%:*}
         spec=${spec#refs/heads/}
-        is_default "$repo" "$remote" "$branch" && ! is_default "$repo" "$remote" "$spec" &&
+        is_default "$repo" "$remote" "$spec" ||
           decide "Approve this pull of $spec into the default branch ($branch)."
       done
       ;;
@@ -97,14 +125,17 @@ check_segment() {
       ((all)) && decide "Approve this push of all branches, which includes the default branch."
       if ((${#pos[@]} <= 1)); then
         ((tags)) && return 0
-        is_default "$repo" "$remote" "$branch" &&
+        [[ -n $branch ]] && is_default "$repo" "$remote" "$branch" &&
           decide "Approve this push to the default branch ($branch) on $remote."
       else
         for spec in "${pos[@]:1}"; do
           spec=${spec#+}
           dst=${spec##*:}
           dst=${dst#refs/heads/}
-          [[ $dst == HEAD ]] && dst=$branch
+          if [[ $dst == HEAD ]]; then
+            [[ -n $branch ]] || decide "Approve this push of a detached HEAD. The hook cannot tell its target branch."
+            dst=$branch
+          fi
           is_default "$repo" "$remote" "$dst" &&
             decide "Approve this push to the default branch ($dst) on $remote."
         done
@@ -114,6 +145,7 @@ check_segment() {
   return 0
 }
 
+command=${command//$'\\\n'/ }
 while IFS= read -r segment; do
   check_segment "$segment"
 done < <(tr ';|&()`' '\n' <<<"$command")

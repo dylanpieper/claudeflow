@@ -134,3 +134,57 @@ def test_main_is_default_without_remote_head(tmp_path):
 
 def test_outside_a_repo_passes(tmp_path):
     assert decision("git merge feature", tmp_path) is None
+
+
+@pytest.fixture
+def detached(tmp_path):
+    repo = make_repo(tmp_path / "detached")
+    git(repo, "switch", "-q", "--detach")
+    return repo
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push origin HEAD:main",
+        "git push origin feature:main",
+        "git push origin :main",
+        "git push --all",
+        "git push origin HEAD",
+    ],
+)
+def test_detached_head_push_to_default_asks(detached, command):
+    assert decision(command, detached) == "ask"
+
+
+@pytest.mark.parametrize("command", ["git merge feature", "git push origin HEAD:feature"])
+def test_detached_head_other_work_passes(detached, command):
+    assert decision(command, detached) is None
+
+
+def test_option_value_is_not_the_remote(tmp_path):
+    repo = make_repo(tmp_path / "trunk", default="trunk", checkout="feature")
+    assert decision("git push -o ci.skip origin trunk", repo) == "ask"
+    assert decision("git push --push-option ci.skip origin feature", repo) is None
+
+
+def test_cd_sets_the_repo(on_main, on_feature):
+    assert decision(f"cd {on_main} && git merge feature", on_feature) == "ask"
+    assert decision(f"cd {on_feature} && git merge main", on_main) is None
+
+
+@pytest.mark.parametrize("command", ["env git merge feature", "command git merge feature", "git merge \\\n  feature"])
+def test_wrappers_and_line_continuations_ask(on_main, command):
+    assert decision(command, on_main) == "ask"
+
+
+def test_missing_jq_reports_error(on_main):
+    result = subprocess.run(
+        [BASH, str(SCRIPT)],
+        input=json.dumps({"tool_input": {"command": "git merge feature"}, "cwd": str(on_main)}),
+        capture_output=True,
+        text=True,
+        env={"PATH": "/nonexistent"},
+    )
+    assert result.returncode == 1
+    assert "jq is not on PATH" in result.stderr
