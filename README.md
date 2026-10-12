@@ -143,7 +143,8 @@ The hook needs `jq`.
 ```
 
 Add this entry to `hooks.PreToolUse` too.
-It asks you to approve each new PR and each merge through `gh`.
+It asks you to approve each new PR through `gh`.
+It also asks for each merge that the deny rule does not block, for example through `gh api`.
 It needs `jq`.
 
 ```
