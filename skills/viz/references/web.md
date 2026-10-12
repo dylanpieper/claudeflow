@@ -1,8 +1,14 @@
 # Web figures in React
 
+## Observable Plot
+
+- For static charts and charts with hover only, use `@observablehq/plot`.
+  - It has the same grammar as ggplot2. Apply the color and text rules in `SKILL.md`.
+- For a static chart with fixed data, render the SVG on the server or at build time.
+
 ## plotly.js
 
-- For standard charts, use `react-plotly.js`.
+- For charts that need zoom, pan, or 3D, use `react-plotly.js`.
 - For more than about 10,000 points, use the WebGL traces (`scattergl`).
 
 ## D3

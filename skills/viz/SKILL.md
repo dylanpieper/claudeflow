@@ -1,18 +1,9 @@
 ---
 name: viz
-description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, D3, Leaflet with OpenStreetMap, mapgl with MapLibre, gt). Use when you make or change a figure, chart, map, or table in any language.
+description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, Observable Plot, D3, Leaflet with OpenStreetMap, mapgl with MapLibre, gt). Use when you make or change a figure, chart, map, or table in any language.
 ---
 
 # Visualization
-
-These rules come from three sources:
-
-- Cédric Scherer, [Beyond Bar and Box Plots](https://z3tt.github.io/beyond-bar-and-box-plots);
-- Cara Thompson, [blog and talks](https://www.cararthompson.com/posts);
-- Kyle Walker, [blog](https://walker-data.com/blog.html), for maps.
-
-If the `dataviz` skill is available, use it for color and visual design.
-These rules override it when they conflict.
 
 ## Show the data
 
@@ -37,8 +28,9 @@ These rules override it when they conflict.
 
 | Need | R | Python | Web (React) |
 |------|---|--------|-------------|
-| Static figure | ggplot2 | plotnine, or seaborn and matplotlib | Not applicable |
-| Standard interactive chart | plotly | plotly | react-plotly.js |
+| Static figure | ggplot2 | plotnine, or seaborn and matplotlib | Observable Plot |
+| Chart with hover only | plotly | plotly | Observable Plot |
+| Chart with zoom, pan, or 3D | plotly | plotly | react-plotly.js |
 | Custom interactive graphic | Not applicable | Not applicable | D3 |
 | Interactive map | leaflet | folium | react-leaflet |
 | Large or 3D interactive map | mapgl | pydeck | maplibre-gl |
@@ -47,8 +39,9 @@ These rules override it when they conflict.
 - Start with a static figure. Make a figure interactive only when both of these are true:
   - the reader needs hover, zoom, or filter;
   - the output is HTML (Quarto HTML, Shiny, or a web app).
-- Use plotly before D3.
-  - Use D3 only when plotly cannot make the graphic.
+- On the web, use Observable Plot first, then plotly, then D3.
+  - Use plotly only when the reader needs zoom, pan, or 3D.
+  - Use D3 only when Observable Plot and plotly cannot make the graphic.
   - Examples: a custom layout, linked views, or custom transitions.
 - Give each figure alt text that tells the main result.
 
@@ -59,7 +52,7 @@ Read the file for the tool that you use:
 - [references/r.md](references/r.md): ggplot2 distributions, layers, labels, and tables.
 - [references/grammar-style.md](references/grammar-style.md): ggplot2 and plotnine themes, color, text, fonts, and export.
 - [references/python.md](references/python.md): plotnine, seaborn, plotly, and great_tables.
-- [references/web.md](references/web.md): D3 and plotly.js in React.
+- [references/web.md](references/web.md): Observable Plot, plotly.js, and D3 in React.
 - [references/maps.md](references/maps.md): Leaflet, OpenStreetMap tiles, mapgl, vector tiles, and dense points.
 
 For spatial data and analysis, use the `spatial` skill.
