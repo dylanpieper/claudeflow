@@ -207,7 +207,23 @@ def test_cd_dash_returns_to_previous_dir(on_main, on_feature):
     assert decision(f"cd {on_feature} && cd - && git merge feature", on_main) == "ask"
 
 
-@pytest.mark.parametrize("flag", ["--git-dir {repo}/.git", "--git-dir={repo}/.git", "--work-tree {repo}"])
+def test_work_tree_does_not_change_the_repo(on_main, on_feature):
+    assert decision(f"git --work-tree {on_feature} merge feature", on_main) == "ask"
+
+
+def test_recurse_submodules_takes_no_separate_value(on_main):
+    assert decision("git pull --recurse-submodules origin feature", on_main) == "ask"
+
+
+def test_cd_in_backticks_stays_in_backticks(on_main, on_feature):
+    assert decision(f"x=`cd {on_feature}; pwd`; git merge feature", on_main) == "ask"
+
+
+def test_quote_in_branch_name_gives_valid_json(on_main):
+    assert decision("git pull origin 'feat\"x'", on_main) == "ask"
+
+
+@pytest.mark.parametrize("flag", ["--git-dir {repo}/.git", "--git-dir={repo}/.git"])
 def test_git_dir_and_work_tree_set_the_repo(on_main, on_feature, flag):
     assert decision(f"git {flag.format(repo=on_main)} merge feature", on_feature) == "ask"
     assert decision(f"git {flag.format(repo=on_feature)} merge main", on_main) is None
@@ -238,3 +254,9 @@ def test_missing_jq_asks_for_git_commands(on_main):
 
 def test_missing_jq_passes_other_commands(on_main):
     assert run_without_jq("ls", on_main) == ""
+
+
+def test_missing_jq_ignores_git_in_the_cwd(tmp_path):
+    cwd = tmp_path / "github" / "proj"
+    cwd.mkdir(parents=True)
+    assert run_without_jq("ls", cwd) == ""

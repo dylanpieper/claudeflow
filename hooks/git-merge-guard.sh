@@ -7,18 +7,27 @@
 # Asks for each command that mentions `git` when `jq` is missing, because the hook cannot parse it.
 # Other commands get no decision.
 # Limits: the hook reads the command text only.
-# It follows `cd`, `git -C`, `--git-dir`, `--work-tree`, and subshells.
+# It follows `cd`, `git -C`, `--git-dir`, subshells, and backtick substitutions.
 # It does not see into `bash -c` strings, git or shell aliases, or scripts.
 # It finds `git` in any word position, so text such as `echo git merge x` can also ask.
 
 ask() {
-  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"%s"}}\n' "$1"
+  jq -n --arg r "$1" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "ask",
+      permissionDecisionReason: $r
+    }
+  }'
   exit 0
 }
 
 input=$(</dev/stdin)
 if ! command -v jq >/dev/null; then
-  [[ $input == *git* ]] && ask "git-merge-guard cannot check this command because jq is not on PATH."
+  raw_re='"command"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*git'
+  if [[ $input =~ $raw_re ]]; then
+    printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"git-merge-guard cannot check this command because jq is not on PATH."}}'
+  fi
   exit 0
 fi
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
@@ -77,7 +86,7 @@ resolve() {
 
 lead_re='^(if|then|else|elif|do|while|until|!|\{|env|command|exec|time|nohup|sudo|timeout|xargs)$'
 global_value_re='^(-C|-c|--git-dir|--work-tree|--namespace|--exec-path|--super-prefix|--config-env)$'
-value_opt_re='^(-o|--push-option|--server-option|--repo|--receive-pack|--exec|-m|-F|--file|-s|--strategy|-X|--strategy-option|--into-name|--depth|--deepen|--shallow-since|--shallow-exclude|--upload-pack|-j|--jobs|--negotiation-tip|--recurse-submodules)$'
+value_opt_re='^(-o|--push-option|--server-option|--repo|--receive-pack|--exec|-m|-F|--file|-s|--strategy|-X|--strategy-option|--into-name|--depth|--deepen|--shallow-since|--shallow-exclude|--upload-pack|-j|--jobs|--negotiation-tip)$'
 
 dir=$cwd
 olddir=$cwd
@@ -107,8 +116,6 @@ check_git() {
       -C) repo=$(resolve "${t[i+1]}") ;;
       --git-dir) repo=$(resolve "${t[i+1]}") ;;
       --git-dir=*) repo=$(resolve "${t[i]#*=}") ;;
-      --work-tree) repo=$(resolve "${t[i+1]}") ;;
-      --work-tree=*) repo=$(resolve "${t[i]#*=}") ;;
     esac
     if [[ ${t[i]} =~ $global_value_re ]]; then ((i += 2)); else ((i++)); fi
   done
@@ -196,19 +203,26 @@ check_segment() {
   return 0
 }
 
+enter_subshell() { dirs+=("$dir|$olddir"); }
+
+leave_subshell() {
+  ((${#dirs[@]})) || return 0
+  local saved=${dirs[${#dirs[@]}-1]}
+  unset 'dirs[${#dirs[@]}-1]'
+  dir=${saved%%|*}
+  olddir=${saved#*|}
+}
+
 command=${command//$'\\\n'/ }
+in_backticks=0
 while IFS= read -r segment; do
   case $segment in
-    $'\001(') dirs+=("$dir|$olddir") ;;
-    $'\001)')
-      if ((${#dirs[@]})); then
-        saved=${dirs[${#dirs[@]}-1]}
-        unset 'dirs[${#dirs[@]}-1]'
-        dir=${saved%%|*}
-        olddir=${saved#*|}
-      fi
+    $'\001(') enter_subshell ;;
+    $'\001)') leave_subshell ;;
+    $'\001`')
+      if ((in_backticks)); then leave_subshell; else enter_subshell; fi
+      ((in_backticks = !in_backticks))
       ;;
-    $'\001`') ;;
     *) check_segment "$segment" ;;
   esac
 done < <(split_command "$command")
