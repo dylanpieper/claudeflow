@@ -24,14 +24,17 @@ My Claude Code setup.
 - [CLAUDE.md](CLAUDE.md): rules for every session.
 - [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
 - [skills/](skills/): research-writing, viz, spatial, and audit-instructions.
-- [hooks/git-commit-guard.sh](hooks/git-commit-guard.sh): blocks commits to the default branch and asks before all other commits.
+- [hooks/](hooks/): approval guards.
+  - `git-commit-guard.sh` blocks commits to the default branch and asks before all other commits.
+  - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
+  - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
 ## Install
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-for f in CLAUDE.md statusline.sh hooks/git-commit-guard.sh \
+for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,spatial,audit-instructions,viz}/SKILL.md \
   skills/viz/references/{r,grammar-style,python,web,maps}.md; do
@@ -40,7 +43,7 @@ done
 chmod +x ~/.claude/hooks/*.sh
 ```
 
-Merge this into `~/.claude/settings.json`. The hook and the status line need `jq`.
+Merge this into `~/.claude/settings.json`. The hooks and the status line need `jq`.
 The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude Code v2.1.285 or later).
 
 ```
@@ -56,7 +59,9 @@ The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude
             "if": "Bash(git *)",
             "command": "$HOME/.claude/hooks/git-commit-guard.sh",
             "timeout": 10
-          }
+          },
+          { "type": "command", "command": "$HOME/.claude/hooks/gh-pr-guard.sh", "timeout": 10 },
+          { "type": "command", "command": "$HOME/.claude/hooks/git-merge-guard.sh", "timeout": 10 }
         ]
       }
     ]
