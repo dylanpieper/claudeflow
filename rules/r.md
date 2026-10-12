@@ -24,19 +24,17 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 - If a project already uses another package manager, such as `rv`, `uvr`, `rix`, or `ir`, use it.
   - Follow its documentation to add a package.
   - Do not add a second one.
-- If the project has no package manager, ask before you run `renv::init()`. Until then, use `pak::pak()`.
-- In an R package, declare dependencies in `DESCRIPTION` with `usethis::use_package()`. Use `renv` or `pak` only to install them.
-- Use [`renv`](https://rstudio.github.io/renv/) for project packages.
-  - To add a package: `renv::install()`, then `renv::snapshot()`.
+- In an `renv` project, add a package with `renv::install()`, then `renv::snapshot()`.
   - To make `renv` use pak, add `options(renv.config.pak.enabled = TRUE)` to the project `.Rprofile`, before `source("renv/activate.R")`.
   - Do not create a project `.Renviron`: it masks `~/.Renviron`, which holds tokens and keys.
-- For R and Python in one project, use `renv` for R and `uv` for Python.
+- If the project has no package manager, ask before you run `renv::init()`. Until then, use `pak::pak()`.
+  - It installs from CRAN, GitHub (`"user/repo"`), and Bioconductor (`"bioc::pkg"`) in one call.
+  - With no arguments, it installs the current package's development dependencies (requires a `DESCRIPTION`).
+- In an R package, declare dependencies in `DESCRIPTION` with `usethis::use_package()`. Use `renv` or `pak` only to install them.
+- For R and Python in one project, use `uv` for Python. For R, follow the rules above.
   - `uv` keeps the Python packages in `pyproject.toml`, `uv.lock`, and `.venv/`.
   - In R, call `reticulate::use_virtualenv(here::here(".venv"))` before the first Python call.
   - Do not use `renv::use_python()`: it uses `pip` or `conda`, not `uv`. See [renv with Python](https://rstudio.github.io/renv/articles/python.html).
-- Outside an `renv` project, use `pak::pak()`.
-  - It installs from CRAN, GitHub (`"user/repo"`), and Bioconductor (`"bioc::pkg"`) in one call.
-  - With no arguments, it installs the current package's development dependencies (requires a `DESCRIPTION`).
 - Never use `install.packages()`, `remotes::install_github()`, or `devtools::install_github()`.
 
 ## Paths
