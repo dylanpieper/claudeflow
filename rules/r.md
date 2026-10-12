@@ -51,8 +51,11 @@ Choosing a manager for a new project:
 
 ## Paths
 
-- Build project paths with `here::here()`. Do not use `setwd()` or paths relative to the working directory.
+- In scripts, analysis projects, and Quarto documents, build paths with `here::here()`.
+- Do not use `setwd()` or paths relative to the working directory.
+- In package code, read files shipped in `inst/` with `system.file(package = )` or `fs::path_package()`, not `here::here()`.
 - Use `fs` for file and directory work (`fs::path()`, `fs::dir_ls()`, `fs::dir_create()`), not base `file.path()`, `list.files()`, or `dir.create()`.
+- In a package that does not import `fs`, add it to Imports only when the file work justifies a new dependency.
 
 ## Tools
 
