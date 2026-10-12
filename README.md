@@ -47,6 +47,8 @@ Hooks and permission settings always apply. No instruction file can override the
 - **[CLAUDE.md](CLAUDE.md)**: Rules for every session (e.g., one purpose for each branch and PR).
 - **[rules/roborev.md](rules/roborev.md)**: How Claude uses roborev to review or fix commits before opening a PR.
 - **[hooks/git-commit-guard.sh](hooks/git-commit-guard.sh)**: Blocks commits to the default branch and asks you to approve all other commits.
+- **[hooks/gh-pr-guard.sh](hooks/gh-pr-guard.sh)**: Asks you to approve each new PR, and each `gh api` call that can write.
+- **[hooks/git-merge-guard.sh](hooks/git-merge-guard.sh)**: Asks you to approve each local merge, pull, or push that changes the default branch.
 - **[statusline.sh](statusline.sh)**: Status line with model, folder, caveman mode, context use, and 5-hour and 7-day plan use.
 - **[research-writing](skills/research-writing/SKILL.md)**: APA 7 and open-science rules.
 - **[viz](skills/viz/SKILL.md)**: Rules for figures, charts, maps, and tables, and how to choose a tool.
@@ -91,6 +93,10 @@ curl -fsSL $base/skills/spatial/SKILL.md -o ~/.claude/skills/spatial/SKILL.md
 curl -fsSL $base/skills/audit-instructions/SKILL.md -o ~/.claude/skills/audit-instructions/SKILL.md
 curl -fsSL $base/hooks/git-commit-guard.sh -o ~/.claude/hooks/git-commit-guard.sh
 chmod +x ~/.claude/hooks/git-commit-guard.sh
+curl -fsSL $base/hooks/gh-pr-guard.sh -o ~/.claude/hooks/gh-pr-guard.sh
+chmod +x ~/.claude/hooks/gh-pr-guard.sh
+curl -fsSL $base/hooks/git-merge-guard.sh -o ~/.claude/hooks/git-merge-guard.sh
+chmod +x ~/.claude/hooks/git-merge-guard.sh
 curl -fsSL $base/statusline.sh -o ~/.claude/statusline.sh
 ```
 
@@ -105,10 +111,13 @@ The script needs `jq` on `PATH`.
 ```
 
 The three git rules in `CLAUDE.md` are text that Claude can ignore.
-Two settings enforce them:
+These settings enforce them:
 
 - A deny rule blocks merges.
 - A hook blocks commits to the default branch and asks you to approve all other commits.
+- A hook asks you to approve each new PR through `gh`.
+  It also asks for each `gh api` call that can write, because a write can open or merge a PR.
+- A hook asks you to approve each local merge, pull, or push that changes the default branch.
 
 Add this rule to `permissions.deny` in `~/.claude/settings.json`:
 
@@ -127,6 +136,41 @@ The hook needs `jq`.
       "type": "command",
       "if": "Bash(git *)",
       "command": "$HOME/.claude/hooks/git-commit-guard.sh",
+      "timeout": 10
+    }
+  ]
+}
+```
+
+Add this entry to `hooks.PreToolUse` too.
+It asks you to approve each new PR through `gh`.
+It also asks for each `gh api` call that can write, because a write can open or merge a PR.
+It needs `jq`.
+
+```
+{
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "$HOME/.claude/hooks/gh-pr-guard.sh",
+      "timeout": 10
+    }
+  ]
+}
+```
+
+Add this entry to `hooks.PreToolUse` too.
+It asks you to approve each local merge, pull, or push that changes the default branch.
+It needs `jq`.
+
+```
+{
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "$HOME/.claude/hooks/git-merge-guard.sh",
       "timeout": 10
     }
   ]
