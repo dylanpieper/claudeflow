@@ -91,11 +91,12 @@ For complex projects:
   - `_targets.R`: the pipeline.
   - `R/`: all code that targets use, loaded with `tar_source()`. Do not put `box` modules here.
   - Do not call `box` modules from the pipeline. `targets` does not track changes inside them.
+  - Put logic that the pipeline and an app share in `R/`. Apps read pipeline outputs, for example with `tar_read()`.
 
 ### Modules
 
 - In analysis projects and apps, put reusable code in `box` modules in `box/`.
-  - Import with a path relative to the calling file, for example `box::use(./box/<name>)` from the project root.
+- Import a module with a path relative to the calling file, for example `box::use(./box/<name>)` from the project root.
 - `box::use()` caches modules for the whole R session. After editing a module, restart R or call `box::reload()` before running tests.
 
 ### Apps
