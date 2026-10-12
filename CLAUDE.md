@@ -22,10 +22,10 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - `README.md`, `CONTRIBUTING.md`, the PR template, and recent commits and branch names.
   - In an organization repository, also `<owner>/practices` and `<owner>/.github`.
 - Repository conventions win, then the practices repository, then `.github`, then these rules.
-  - Do the steps they require, for example a draft PR or an AI-use statement.
+- Do the steps that the conventions require, for example a draft PR or an AI-use statement.
 - Use one branch for one purpose.
-  - If you are on the base branch, or the change is unrelated:
-    `git fetch origin`, then `git switch --no-track -c <short-name> origin/<base>`.
+- On the base branch, or for an unrelated change, run `git fetch origin`,
+  then `git switch --no-track -c <short-name> origin/<base>`.
 - Open each PR against the base branch. Do not merge branches locally.
   - Do not stack a PR on another feature branch.
   - If new work depends on an open PR, ask me: add it to that PR, or wait until it merges.
@@ -48,12 +48,13 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - In Markdown, keep lines short.
   - Split a long item into a short lead line and sub-items.
   - Use a list only for two or more items. Write one item as a sentence.
+  - This also applies to sub-lists. Write one sub-item as a sentence in its parent item.
 - Keep a change log and release versions for published work. Skip for a prototype.
 
 ## Libraries and tools
 
-- Before you first use a third-party package or CLI, find its version in the lockfile, manifest, or installation.
-  - Read the documentation and change log for that version. Use its current recommended method.
+Before you first use a third-party package or CLI, find its version in the lockfile, manifest, or installation.
+Read the documentation and change log for that version, and use its current recommended method.
 
 ## Rule files
 
