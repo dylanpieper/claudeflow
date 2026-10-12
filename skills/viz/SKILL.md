@@ -5,15 +5,6 @@ description: Rules for figures, charts, maps, and tables, and how to choose a to
 
 # Visualization
 
-These rules come from three sources:
-
-- Cédric Scherer, [Beyond Bar and Box Plots](https://z3tt.github.io/beyond-bar-and-box-plots);
-- Cara Thompson, [blog and talks](https://www.cararthompson.com/posts);
-- Kyle Walker, [blog](https://walker-data.com/blog.html), for maps.
-
-If the `dataviz` skill is available, use it for color and visual design.
-These rules override it when they conflict.
-
 ## Show the data
 
 - Show the raw data with each summary. Do not show a summary alone.
