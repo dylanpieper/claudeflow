@@ -1,6 +1,8 @@
 ---
 paths:
   - "**/*.{csv,tsv,parquet,xlsx,xls,ndjson,feather,arrow}"
+  - "**/data/**/*.json"
+  - "**/*.geojson"
   - "**/*.{duckdb,ddb,sqlite,db}"
   - "**/data-dict.{yaml,yml}"
   - "**/*.{R,r,Rmd,qmd,py,ipynb,sql}"
