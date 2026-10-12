@@ -24,6 +24,7 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - `README.md` and `CONTRIBUTING.md`.
   - Recent commit messages and branch names.
   - The PR template, if one exists.
+  - If the repository has no `CONTRIBUTING.md` or PR template, look in the owner's `.github` repository.
 - In repositories owned by `RMI`, also read `https://github.com/RMI/practices`.
   - Read it with `gh` before the first commit or PR in a session.
   - Repository conventions override it. It augments my Git workflow.
@@ -35,10 +36,13 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - Before a change, compare it with the branch name, commits, and open PR.
   - If you are on the base branch, or the change is unrelated:
     `git fetch origin`, then `git switch --no-track -c <short-name> origin/<base>`.
+  - The base branch is the default branch, unless the conventions name a different branch.
 - On the first push, run `git push -u origin <short-name>`.
 - Use plain branches in the current checkout, not git worktrees.
+- Commit in small, logical steps with clear messages.
 - When the work is done, show the PR title and description and ask for approval.
 - Before you open or update a PR, make sure each commit fits the PR purpose.
+- In the PR description, tell what changed and why.
 - If no automated test covers a change, tell in the PR:
   - How you verified it.
   - How another person can reproduce the verification.
