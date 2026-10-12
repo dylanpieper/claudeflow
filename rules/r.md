@@ -21,33 +21,19 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 
 ## Package management
 
-Use the manager the project already has, and never add a second one. Ask before adding a new package manager.
-
-| Manager | Manifest | How to add a package |
-|---------|----------|----------------------|
-| [`renv`](https://rstudio.github.io/renv/) | `renv.lock` | `renv::install()`, then `renv::snapshot()` |
-| [`rv`](https://github.com/A2-ai/rv) | `rproject.toml` | Add to the manifest, then sync |
-| [`uvr`](https://github.com/nbafrank/uvr) | `uvr.toml` | Add to the manifest, then sync |
-| [`rix`](https://github.com/ropensci/rix) | `default.nix` | Add to the `rix::rix()` call (see below) |
-| [`ir`](https://github.com/r-lib/ir) | File header | Add to the header |
-
-- With no manager, use `pak::pak()`.
+- If a project already uses another package manager, such as `rv`, `uvr`, `rix`, or `ir`, use it. Do not add a second one.
+- Use [`renv`](https://rstudio.github.io/renv/) for project packages.
+  - To add a package: `renv::install()`, then `renv::snapshot()`.
+  - To make `renv` use pak, add `options(renv.config.pak.enabled = TRUE)` to the project `.Rprofile`, before `source("renv/activate.R")`.
+  - Do not create a project `.Renviron`: it masks `~/.Renviron`, which holds tokens and keys.
+- For R and Python in one project, use `renv` for R and `uv` for Python.
+  - `uv` keeps the Python packages in `pyproject.toml`, `uv.lock`, and `.venv/`.
+  - In R, call `reticulate::use_virtualenv(here::here(".venv"))` before the first Python call.
+  - Do not use `renv::use_python()`: it uses `pip` or `conda`, not `uv`. See [renv with Python](https://rstudio.github.io/renv/articles/python.html).
+- Outside an `renv` project, use `pak::pak()`.
   - It installs from CRAN, GitHub (`"user/repo"`), and Bioconductor (`"bioc::pkg"`) in one call.
   - With no arguments, it installs the current package's development dependencies (requires a `DESCRIPTION`).
 - Never use `install.packages()`, `remotes::install_github()`, or `devtools::install_github()`.
-- To make `renv` use pak, add `options(renv.config.pak.enabled = TRUE)` to the project `.Rprofile`, before `source("renv/activate.R")`.
-  - Do not create a project `.Renviron`: it masks `~/.Renviron`, which holds tokens and keys.
-- With `rix`:
-  - Put CRAN and Bioconductor packages in `r_pkgs`, GitHub packages in `git_pkgs`.
-  - Rerun the call with `overwrite = TRUE` to regenerate `default.nix`. Never edit `default.nix` by hand.
-  - Rebuild with `nix-build` or `nix-shell`.
-
-Choosing a manager for a new project:
-
-- Default to `renv` for packages and `rig` for the R version.
-- Use `rv` or `uvr` when dependencies are known up front and install speed matters.
-- Use `rix` when every OS must get the same R version and system libraries.
-- Use `ir` for a standalone script or Quarto document outside any managed project; it needs no lockfile or project directory.
 
 ## Paths
 
