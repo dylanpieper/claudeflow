@@ -47,7 +47,7 @@ When you build a web app with an API and a UI, use this stack.
 
 In a web app, keep each layer distinct.
 Dependencies point down: a layer can use other modules in its own layer and the layers below it.
-Routes are the exception: they call services, not repositories.
+Routes are the exception: they pass repositories to services but do not call repository methods.
 Never import from a layer above.
 
 | Layer | Owns | Keep out |
@@ -73,7 +73,8 @@ With this stack:
 
 - Frontend: React. Routes: FastAPI routers. Schemas: Pydantic.
 - Repositories: SQLAlchemy `select()` queries. Models: SQLAlchemy tables and Alembic history.
-- Build repositories, sessions, and settings only in the dependency providers in `api/deps.py`.
+- In request handling, build repositories and sessions only in the dependency providers in `api/deps.py`.
   - Route handlers get them with FastAPI `Depends` and give them to services.
+  - Tests, migrations, and scripts can build their own.
   - Do not use global sessions.
 - Use this layout: `backend/app/{api,services,repositories,models,schemas}/` and `frontend/`.
