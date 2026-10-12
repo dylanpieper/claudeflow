@@ -26,8 +26,8 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - The PR template, if one exists.
   - If the repository has no `CONTRIBUTING.md` or PR template, look in the owner's `.github` repository.
 - In repositories owned by `RMI`, also read `https://github.com/RMI/practices`.
-  - Read it with `gh` before the first commit or PR in a session.
-  - Repository conventions override it. It augments my Git workflow.
+  - Read `git.md`, `pull_request.md`, and `version.md` with `gh` before the first commit or PR in a session.
+  - Repository conventions override it. It overrides the fallback rules below.
 - Follow the conventions for base branch, branch names, commits, and PR format.
   - Do the steps they require, for example a draft PR or an AI-use statement.
   - Where they say nothing, use the rules below.
