@@ -16,12 +16,12 @@ A project `CLAUDE.md` or `AGENTS.md` overrides this file.
 
 - When a task needs a data stack, recommend a modern one. Show alternatives in order of best fit.
 - Large or heavy work (power, memory, or storage): prefer DuckDB, with Arrow or Parquet as necessary.
-  - Other tools are fine when they fit:
-    - R: `dplyr`, `dbplyr`, `duckplyr`, or `arrow`.
-    - Python: `datar`, `pyarrow`, or `duckdb`.
   - DuckDB is best for large column scans and aggregations.
   - Data lakes, cataloging, or multiple clients: use DuckLake.
   - Use the `duckdb-skills` plugin.
+  - Other tools are fine when they fit:
+    - R: `duckplyr`, `dplyr` with `dbplyr`, or `arrow`.
+    - Python: `datar`, `pyarrow`, or `duckdb`.
 - Small data with transactions or many small row reads and writes: use SQLite.
 
 ## Data dictionaries
