@@ -1,202 +1,80 @@
 # claudeflow
 
+My Claude Code setup.
+
 ```
-* request
-     │
-     ▼
-  branch
-     │
-     ▼
-  change ◄──┐
-     │      │
-     ▼      │
-* commit    │ fail
-     │      │
-     ▼      │
-  review ───┘
-     │ pass
-     ▼
-*   PR
-     │
-     ▼
-* merge
+👤 request → 🤖 branch → 🤖 change → 👤 commit → 🤖 review → 👤 PR → 👤 merge
+                              ▲                      │
+                              └──── fail ────────────┘
 ```
 
-\* A human acts.
+👤 A human acts. 🤖 Claude acts.
 
-## In this repo
+## Precedence
 
-Order of precedence, from highest to lowest:
+1. Hooks and permission settings.
+2. The two non-negotiable rules in [CLAUDE.md](CLAUDE.md).
+3. My instructions in a session.
+4. The project's `AGENTS.md` or `CLAUDE.md`.
+5. This repo.
+6. Skills and plugins.
 
-1. Three git rules in [CLAUDE.md](CLAUDE.md). A project cannot override them.
-   - A human approves each commit and each new PR before Claude makes it.
-   - Claude does not commit directly to the default branch (usually `main`).
-   - Only a human merges a pull request. Claude never merges.
-2. My direct instructions to Claude in the session.
-3. The `AGENTS.md` or `CLAUDE.md` file of the project that Claude works in.
-4. My instructions in this repo:
-   - `CLAUDE.md`.
-   - `rules/r.md`, `rules/python.md`, `rules/data.md`, and `rules/roborev.md`.
-   - `skills/audit-instructions`, `skills/research-writing`, `skills/spatial`, and `skills/viz`.
-5. Instructions that I install from other sources:
-   - Skills and plugins, including roborev skills in `~/.claude/skills/`.
-   - The Clanker Constitution, which I link into `~/.claude/rules/`.
+## Files
 
-Hooks and permission settings always apply. No instruction file can override them.
-
-- **[CLAUDE.md](CLAUDE.md)**: Rules for every session (e.g., one purpose for each branch and PR).
-- **[rules/roborev.md](rules/roborev.md)**: How Claude uses roborev to review or fix commits before opening a PR.
-- **[hooks/git-commit-guard.sh](hooks/git-commit-guard.sh)**: Blocks commits to the default branch and asks you to approve all other commits.
-- **[hooks/gh-pr-guard.sh](hooks/gh-pr-guard.sh)**: Asks you to approve each new PR, and each `gh api` call that can write.
-- **[hooks/git-merge-guard.sh](hooks/git-merge-guard.sh)**: Asks you to approve each local merge, pull, or push that changes the default branch.
-- **[statusline.sh](statusline.sh)**: Status line with model, folder, caveman mode, context use, and 5-hour and 7-day plan use.
-- **[research-writing](skills/research-writing/SKILL.md)**: APA 7 and open-science rules.
-- **[viz](skills/viz/SKILL.md)**: Rules for figures, charts, maps, and tables, and how to choose a tool.
-- **[spatial](skills/spatial/SKILL.md)**: Rules for Census data, distance, travel time, and spatial clusters.
-- **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to check for outdated instructions and open a PR with fixes.
-- **[rules/r.md](rules/r.md)**: R preferences. Loads only for R files.
-- **[rules/python.md](rules/python.md)**: Python and frontend preferences. Loads only for Python and frontend files.
-- **[rules/data.md](rules/data.md)**: Data stack and data dictionary rules. Loads for data files, `data-dict.yaml`, and R, Python, notebook, Quarto, or SQL files.
-
-## Installed tools
-
-### Workflow
-
-- **[Clanker Constitution](https://github.com/kenn-io/constitution)**: Operating principles for coding agents.
-- **[roborev](https://github.com/kenn-io/roborev)**: Reviews each commit in the background and sends findings to Claude.
-- **[caveman](https://github.com/juliusbrussee/caveman)**: Short output, fewer tokens.
-
-### Development
-
-- **[Superpowers](https://github.com/obra/superpowers)**: Plan, test, and debug.
-- **[duckdb-skills](https://github.com/duckdb/duckdb-skills)**: Read and query data files.
-- **[r-skills](https://github.com/ab604/claude-code-r-skills)** and **[Posit skills](https://github.com/posit-dev/skills)**: R, packages, Quarto, and Shiny.
-- **[python-skills](https://github.com/wdm0006/python-skills)**: Python setup with uv, ruff, and pytest.
-- **[slidecrafting](https://github.com/EmilHvitfeldt/slidecrafting-book.com)**: Build, theme, and animate Quarto reveal.js slide decks.
+- [CLAUDE.md](CLAUDE.md): rules for every session.
+- [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
+- [skills/](skills/): research-writing, viz, spatial, and audit-instructions.
+- [hooks/](hooks/): approval guards.
+  - `git-commit-guard.sh` blocks commits to the default branch and asks before all other commits.
+  - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
+  - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch.
+- [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
 ## Install
 
-### 1. This repo
-
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-mkdir -p ~/.claude/rules ~/.claude/hooks ~/.claude/skills/research-writing ~/.claude/skills/viz/references ~/.claude/skills/spatial ~/.claude/skills/audit-instructions
-curl -fsSL $base/CLAUDE.md -o ~/.claude/CLAUDE.md
-curl -fsSL $base/rules/r.md -o ~/.claude/rules/r.md
-curl -fsSL $base/rules/python.md -o ~/.claude/rules/python.md
-curl -fsSL $base/rules/data.md -o ~/.claude/rules/data.md
-curl -fsSL $base/rules/roborev.md -o ~/.claude/rules/roborev.md
-curl -fsSL $base/skills/research-writing/SKILL.md -o ~/.claude/skills/research-writing/SKILL.md
-curl -fsSL $base/skills/viz/SKILL.md -o ~/.claude/skills/viz/SKILL.md
-for f in r grammar-style python web maps; do curl -fsSL $base/skills/viz/references/$f.md -o ~/.claude/skills/viz/references/$f.md; done
-curl -fsSL $base/skills/spatial/SKILL.md -o ~/.claude/skills/spatial/SKILL.md
-curl -fsSL $base/skills/audit-instructions/SKILL.md -o ~/.claude/skills/audit-instructions/SKILL.md
-curl -fsSL $base/hooks/git-commit-guard.sh -o ~/.claude/hooks/git-commit-guard.sh
-chmod +x ~/.claude/hooks/git-commit-guard.sh
-curl -fsSL $base/hooks/gh-pr-guard.sh -o ~/.claude/hooks/gh-pr-guard.sh
-chmod +x ~/.claude/hooks/gh-pr-guard.sh
-curl -fsSL $base/hooks/git-merge-guard.sh -o ~/.claude/hooks/git-merge-guard.sh
-chmod +x ~/.claude/hooks/git-merge-guard.sh
-curl -fsSL $base/statusline.sh -o ~/.claude/statusline.sh
+for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh \
+  rules/{r,python,data,roborev}.md \
+  skills/{research-writing,spatial,audit-instructions,viz}/SKILL.md \
+  skills/viz/references/{r,grammar-style,python,web,maps}.md; do
+  curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
+done
+chmod +x ~/.claude/hooks/*.sh
 ```
 
-Add this entry to `~/.claude/settings.json` to show the status line.
-The script needs `jq` on `PATH`.
-
-```
-"statusLine": {
-  "type": "command",
-  "command": "bash ~/.claude/statusline.sh"
-}
-```
-
-The three git rules in `CLAUDE.md` are text that Claude can ignore.
-These settings enforce them:
-
-- A deny rule blocks merges.
-- A hook blocks commits to the default branch and asks you to approve all other commits.
-- A hook asks you to approve each new PR through `gh`.
-  It also asks for each `gh api` call that can write, because a write can open or merge a PR.
-- A hook asks you to approve each local merge, pull, or push that changes the default branch.
-
-Add this rule to `permissions.deny` in `~/.claude/settings.json`:
-
-```
-"Bash(gh pr merge:*)"
-```
-
-Add this entry to `hooks.PreToolUse` in `~/.claude/settings.json`.
-The hook needs `jq`.
+Merge this into `~/.claude/settings.json`. The hooks and the status line need `jq`.
+The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude Code v2.1.285 or later).
 
 ```
 {
-  "matcher": "Bash",
-  "hooks": [
-    {
-      "type": "command",
-      "if": "Bash(git *)",
-      "command": "$HOME/.claude/hooks/git-commit-guard.sh",
-      "timeout": 10
+  "statusLine": { "type": "command", "command": "bash ~/.claude/statusline.sh" },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git *)",
+            "command": "$HOME/.claude/hooks/git-commit-guard.sh",
+            "timeout": 10
+          },
+          { "type": "command", "command": "$HOME/.claude/hooks/gh-pr-guard.sh", "timeout": 10 },
+          { "type": "command", "command": "$HOME/.claude/hooks/git-merge-guard.sh", "timeout": 10 }
+        ]
+      }
+    ]
+  },
+  "pluginConfigs": {
+    "cc-plugin-agents-md@builtin": {
+      "options": { "instructionFiles": "claude-md-and-agents-md" }
     }
-  ]
-}
-```
-
-Add this entry to `hooks.PreToolUse` too.
-It asks you to approve each new PR through `gh`.
-It also asks for each `gh api` call that can write, because a write can open or merge a PR.
-It needs `jq`.
-
-```
-{
-  "matcher": "Bash",
-  "hooks": [
-    {
-      "type": "command",
-      "command": "$HOME/.claude/hooks/gh-pr-guard.sh",
-      "timeout": 10
-    }
-  ]
-}
-```
-
-Add this entry to `hooks.PreToolUse` too.
-It asks you to approve each local merge, pull, or push that changes the default branch.
-It needs `jq`.
-
-```
-{
-  "matcher": "Bash",
-  "hooks": [
-    {
-      "type": "command",
-      "command": "$HOME/.claude/hooks/git-merge-guard.sh",
-      "timeout": 10
-    }
-  ]
-}
-```
-
-Add this entry to `~/.claude/settings.json`.
-Then Claude reads a project's `AGENTS.md` together with all `CLAUDE.md` files.
-
-- With the default setting, a `CLAUDE.md` in the project or a parent folder stops `AGENTS.md` from loading.
-- This needs Claude Code v2.1.285 or later.
-
-```
-"pluginConfigs": {
-  "cc-plugin-agents-md@builtin": {
-    "options": { "instructionFiles": "claude-md-and-agents-md" }
   }
 }
 ```
 
-To add rules for a group of repositories, for example all work repositories, put a `CLAUDE.md` in their parent folder.
-Claude Code reads the `CLAUDE.md` in each folder above the working directory.
-
-### 2. Protect main
-
-Run this in each repository to block direct pushes to the default branch.
+Block direct pushes to the default branch in each repository.
 On the free plan, GitHub does not enforce this on private repositories.
 
 ```
@@ -224,90 +102,31 @@ gh api repos/{owner}/{repo}/rulesets --method POST --input - <<'EOF'
 EOF
 ```
 
-### 3. Clanker Constitution
+Tools and plugins:
 
 ```
-git clone https://github.com/kenn-io/constitution ~/src/constitution
-mkdir -p ~/.claude/rules
-ln -s ~/src/constitution/CONSTITUTION.md ~/.claude/rules/clanker-constitution.md
-```
-
-### 4. roborev
-
-```
-brew install kenn-io/tap/roborev
+brew install gh kenn-io/tap/roborev
+uv tool install data-dict-yaml
+uv tool install air-formatter
 roborev agent-hook install
 roborev skills install
-```
 
-Then run `roborev init` in each repository that you want to review.
-
-### 5. Plugins
-
-```
 claude plugin marketplace add anthropics/claude-plugins-official
 claude plugin install superpowers@claude-plugins-official
 claude plugin marketplace add JuliusBrussee/caveman
 claude plugin install caveman@caveman
-
 claude plugin marketplace add duckdb/duckdb-skills
 claude plugin install duckdb-skills@duckdb-skills
-
 claude plugin marketplace add ab604/claude-code-r-skills
 claude plugin install r-skills@r-skills
 claude plugin marketplace add posit-dev/skills
 claude plugin install r-lib@posit-dev-skills
 claude plugin install quarto@posit-dev-skills
 claude plugin install shiny@posit-dev-skills
-
 claude plugin marketplace add wdm0006/python-skills
 claude plugin install python-library-foundations@dev-skills
-
 claude plugin marketplace add EmilHvitfeldt/slidecrafting-book.com
 claude plugin install slidecrafting@slidecrafting
 ```
 
-### 6. Command-line tools the rules call
-
-`CLAUDE.md` calls [gh](https://cli.github.com/).
-`rules/data.md` calls [data-dict](https://github.com/tidyverse/data-dict).
-`rules/r.md` calls [Air](https://posit-dev.github.io/air/).
-
-```
-brew install gh
-uv tool install data-dict-yaml
-uv tool install air-formatter
-```
-
-## Use
-
-### roborev dashboard
-
-| Command | Result |
-|---|---|
-| `roborev tui` | Opens the dashboard in the terminal |
-| `roborev ui` | Opens the dashboard in the browser |
-
-### roborev commands
-
-| Command | Result |
-|---|---|
-| `/roborev-review` · `/roborev-review-branch` | Reviews a commit or a branch |
-| `/roborev-design-review` · `/roborev-design-review-branch` | Reviews the design of a commit or a branch |
-| `/roborev-lookahead-review` · `/roborev-lookahead-review-branch` | Looks ahead for problems in a commit or a branch |
-| `/roborev-fix` | Fixes open review findings |
-| `/roborev-refine` | Fixes findings and reviews again until they pass |
-| `/roborev-respond` | Replies to a review |
-| `/roborev-snooze` | Pauses review reminders |
-
-### caveman commands
-
-| Command | Result |
-|---|---|
-| `/caveman` | Turns on caveman mode at level `full` |
-| `/caveman lite` · `/caveman ultra` | Makes output less or more terse |
-| `/caveman off` or "normal mode" | Turns off caveman mode |
-| `/caveman-commit` | Writes a short Conventional Commit message |
-| `/caveman-review` | Writes one-line review findings |
-| `/caveman:compress <file>` | Compresses a Markdown file and keeps a backup |
-| `/caveman-help` | Shows the caveman quick reference |
+Run `roborev init` in each repository that you want to review.
