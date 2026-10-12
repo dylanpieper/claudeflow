@@ -173,18 +173,68 @@ def test_cd_sets_the_repo(on_main, on_feature):
     assert decision(f"cd {on_feature} && git merge main", on_main) is None
 
 
-@pytest.mark.parametrize("command", ["env git merge feature", "command git merge feature", "git merge \\\n  feature"])
-def test_wrappers_and_line_continuations_ask(on_main, command):
+@pytest.mark.parametrize(
+    "command",
+    [
+        "env git merge feature",
+        "command git merge feature",
+        "sudo git merge feature",
+        "if true; then git merge feature; fi",
+        "(git merge feature)",
+        "echo $(git merge feature)",
+        "! git merge feature",
+        "git commit -m 'a; b' && git merge feature",
+    ],
+)
+def test_wrappers_keywords_and_subshells_ask(on_main, command):
     assert decision(command, on_main) == "ask"
 
 
-def test_missing_jq_reports_error(on_main):
+def test_line_continuation_is_joined(on_feature):
+    assert decision("git push \\\n  origin main", on_feature) == "ask"
+
+
+def test_for_loop_push_asks(on_feature):
+    assert decision("for b in x; do git push origin main; done", on_feature) == "ask"
+
+
+def test_cd_in_subshell_stays_in_subshell(on_main, on_feature):
+    assert decision(f"(cd {on_feature} && git status) && git merge feature", on_main) == "ask"
+    assert decision(f"(cd {on_main} && git status) && git merge main", on_feature) is None
+
+
+def test_cd_dash_returns_to_previous_dir(on_main, on_feature):
+    assert decision(f"cd {on_feature} && cd - && git merge feature", on_main) == "ask"
+
+
+@pytest.mark.parametrize("flag", ["--git-dir {repo}/.git", "--git-dir={repo}/.git", "--work-tree {repo}"])
+def test_git_dir_and_work_tree_set_the_repo(on_main, on_feature, flag):
+    assert decision(f"git {flag.format(repo=on_main)} merge feature", on_feature) == "ask"
+    assert decision(f"git {flag.format(repo=on_feature)} merge main", on_main) is None
+
+
+def test_more_option_values_are_not_the_remote(tmp_path):
+    repo = make_repo(tmp_path / "trunk", default="trunk", checkout="feature")
+    assert decision("git push --server-option x -j 4 origin trunk", repo) == "ask"
+
+
+def run_without_jq(command, cwd):
     result = subprocess.run(
         [BASH, str(SCRIPT)],
-        input=json.dumps({"tool_input": {"command": "git merge feature"}, "cwd": str(on_main)}),
+        input=json.dumps({"tool_input": {"command": command}, "cwd": str(cwd)}),
         capture_output=True,
         text=True,
         env={"PATH": "/nonexistent"},
+        check=True,
     )
-    assert result.returncode == 1
-    assert "jq is not on PATH" in result.stderr
+    return result.stdout
+
+
+def test_missing_jq_asks_for_git_commands(on_main):
+    out = json.loads(run_without_jq("git merge feature", on_main))
+    assert out["hookSpecificOutput"]["permissionDecision"] == "ask"
+    assert "jq is not on PATH" in out["hookSpecificOutput"]["permissionDecisionReason"]
+
+
+def test_missing_jq_passes_other_commands(on_main):
+    assert run_without_jq("ls", on_main) == ""

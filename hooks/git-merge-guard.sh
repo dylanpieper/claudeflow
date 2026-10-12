@@ -4,28 +4,49 @@
 #   `git merge` while the default branch is checked out,
 #   `git pull` of a different branch into the default branch,
 #   `git push` that updates the default branch on the remote.
+# Asks for each command that mentions `git` when `jq` is missing, because the hook cannot parse it.
 # Other commands get no decision.
 # Limits: the hook reads the command text only.
-# It follows `cd <dir>` and `git -C <dir>`, but it does not see into `bash -c` strings,
-# git or shell aliases, or scripts.
+# It follows `cd`, `git -C`, `--git-dir`, `--work-tree`, and subshells.
+# It does not see into `bash -c` strings, git or shell aliases, or scripts.
+# It finds `git` in any word position, so text such as `echo git merge x` can also ask.
 
-command -v jq >/dev/null || { echo "git-merge-guard: jq is not on PATH, so the guard is off." >&2; exit 1; }
+ask() {
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"%s"}}\n' "$1"
+  exit 0
+}
 
-input=$(cat)
+input=$(</dev/stdin)
+if ! command -v jq >/dev/null; then
+  [[ $input == *git* ]] && ask "git-merge-guard cannot check this command because jq is not on PATH."
+  exit 0
+fi
 command=$(jq -r '.tool_input.command // empty' <<<"$input")
 cwd=$(jq -r '.cwd // empty' <<<"$input")
 
 [[ $command == *git* ]] || exit 0
 
-decide() {
-  jq -n --arg r "$1" '{
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "ask",
-      permissionDecisionReason: $r
+# Prints one segment per line. Splits on ; & | and newlines outside quotes.
+# Prints a marker line for each ( ) and backtick outside quotes, so the caller can track subshells.
+# A newline also ends any open quote, so a stray quote in a heredoc cannot hide later commands.
+split_command() {
+  LC_ALL=C awk '{
+    out = ""; q = ""; n = length($0)
+    for (i = 1; i <= n; i++) {
+      c = substr($0, i, 1)
+      if (q != "") {
+        if (q == "\"" && c == "\\") { out = out c substr($0, i + 1, 1); i++; continue }
+        if (c == q) q = ""
+        out = out c; continue
+      }
+      if (c == "\047" || c == "\"") { q = c; out = out c }
+      else if (c == "\\") { out = out c substr($0, i + 1, 1); i++ }
+      else if (c == ";" || c == "&" || c == "|") { print out; out = "" }
+      else if (c == "(" || c == ")" || c == "`") { print out; print "\001" c; out = "" }
+      else out = out c
     }
-  }'
-  exit 0
+    print out
+  }' <<<"$1"
 }
 
 # Succeeds when $3 is the default branch of remote $2 in repo $1.
@@ -54,40 +75,50 @@ resolve() {
   echo "$p"
 }
 
-# Options of merge, pull, and push that take their value as the next word.
-value_opt_re='^(-o|--push-option|--repo|--receive-pack|--exec|-m|-F|--file|-s|--strategy|-X|--strategy-option|--into-name|--depth|--deepen|--shallow-since|--shallow-exclude|--upload-pack)$'
+lead_re='^(if|then|else|elif|do|while|until|!|\{|env|command|exec|time|nohup|sudo|timeout|xargs)$'
+global_value_re='^(-C|-c|--git-dir|--work-tree|--namespace|--exec-path|--super-prefix|--config-env)$'
+value_opt_re='^(-o|--push-option|--server-option|--repo|--receive-pack|--exec|-m|-F|--file|-s|--strategy|-X|--strategy-option|--into-name|--depth|--deepen|--shallow-since|--shallow-exclude|--upload-pack|-j|--jobs|--negotiation-tip|--recurse-submodules)$'
 
 dir=$cwd
+olddir=$cwd
+dirs=()
 
-check_segment() {
-  local -a t
-  read -ra t <<<"$1"
-  local i=0 n=${#t[@]}
-
-  if [[ ${t[0]} == cd ]]; then
-    ((n > 1)) && dir=$(resolve "${t[1]}")
-    return 0
+do_cd() {
+  local -a a=("$@")
+  local i=0
+  while ((i < ${#a[@]})) && [[ ${a[i]} == -[LPe@]* && ${a[i]} != - ]]; do ((i++)); done
+  local target=${a[i]:-$HOME}
+  local prev=$dir
+  if [[ $target == - ]]; then
+    dir=$olddir
+  else
+    dir=$(resolve "$target")
   fi
+  olddir=$prev
+}
 
-  while ((i < n)) && [[ ${t[i]} == *=* && ${t[i]} != -* || ${t[i]} =~ ^(env|command|exec|time|nohup)$ ]]; do
-    ((i++))
-  done
-  ((i < n)) && [[ ${t[i]##*/} == git ]] || return 0
-  ((i++))
+# Checks the git call in words $@, which start after the `git` word.
+check_git() {
+  local -a t=("$@")
+  local i=0 n=${#t[@]} repo=$dir
 
-  local repo=$dir
-  while ((i < n)); do
+  while ((i < n)) && [[ ${t[i]} == -* ]]; do
     case ${t[i]} in
-      -C) repo=$(resolve "${t[i+1]}"); ((i += 2)) ;;
-      -c) ((i += 2)) ;;
-      -*) ((i++)) ;;
-      *) break ;;
+      -C) repo=$(resolve "${t[i+1]}") ;;
+      --git-dir) repo=$(resolve "${t[i+1]}") ;;
+      --git-dir=*) repo=$(resolve "${t[i]#*=}") ;;
+      --work-tree) repo=$(resolve "${t[i+1]}") ;;
+      --work-tree=*) repo=$(resolve "${t[i]#*=}") ;;
     esac
+    if [[ ${t[i]} =~ $global_value_re ]]; then ((i += 2)); else ((i++)); fi
   done
   ((i < n)) || return 0
+  [[ ${repo##*/} == .git ]] && repo=${repo%/.git}
 
   local sub=${t[i]}
   ((i++))
+  [[ $sub =~ ^(merge|pull|push)$ ]] || return 0
+
   local -a pos=()
   local all=0 tags=0
   while ((i < n)); do
@@ -109,7 +140,7 @@ check_segment() {
   case $sub in
     merge)
       [[ -n $branch ]] && is_default "$repo" origin "$branch" &&
-        decide "Approve this merge into the default branch ($branch)."
+        ask "Approve this merge into the default branch ($branch)."
       ;;
     pull)
       [[ -n $branch ]] && is_default "$repo" "$remote" "$branch" || return 0
@@ -118,26 +149,26 @@ check_segment() {
         spec=${spec%%:*}
         spec=${spec#refs/heads/}
         is_default "$repo" "$remote" "$spec" ||
-          decide "Approve this pull of $spec into the default branch ($branch)."
+          ask "Approve this pull of $spec into the default branch ($branch)."
       done
       ;;
     push)
-      ((all)) && decide "Approve this push of all branches, which includes the default branch."
+      ((all)) && ask "Approve this push of all branches, which includes the default branch."
       if ((${#pos[@]} <= 1)); then
         ((tags)) && return 0
         [[ -n $branch ]] && is_default "$repo" "$remote" "$branch" &&
-          decide "Approve this push to the default branch ($branch) on $remote."
+          ask "Approve this push to the default branch ($branch) on $remote."
       else
         for spec in "${pos[@]:1}"; do
           spec=${spec#+}
           dst=${spec##*:}
           dst=${dst#refs/heads/}
           if [[ $dst == HEAD ]]; then
-            [[ -n $branch ]] || decide "Approve this push of a detached HEAD. The hook cannot tell its target branch."
+            [[ -n $branch ]] || ask "Approve this push of a detached HEAD. The hook cannot tell its target branch."
             dst=$branch
           fi
           is_default "$repo" "$remote" "$dst" &&
-            decide "Approve this push to the default branch ($dst) on $remote."
+            ask "Approve this push to the default branch ($dst) on $remote."
         done
       fi
       ;;
@@ -145,9 +176,41 @@ check_segment() {
   return 0
 }
 
+check_segment() {
+  local -a t
+  read -ra t <<<"$1"
+  local k=0 n=${#t[@]} w
+
+  while ((k < n)) && [[ ${t[k]} =~ $lead_re || (${t[k]} == *=* && ${t[k]} != -*) ]]; do ((k++)); done
+  if [[ ${t[k]} == cd ]]; then
+    do_cd "${t[@]:k+1}"
+    return 0
+  fi
+
+  for ((k = 0; k < n; k++)); do
+    w=${t[k]}
+    [[ $w == *git ]] || continue
+    while [[ $w == [\{\!\$\"\']* ]]; do w=${w:1}; done
+    [[ ${w##*/} == git ]] && check_git "${t[@]:k+1}"
+  done
+  return 0
+}
+
 command=${command//$'\\\n'/ }
 while IFS= read -r segment; do
-  check_segment "$segment"
-done < <(tr ';|&()`' '\n' <<<"$command")
+  case $segment in
+    $'\001(') dirs+=("$dir|$olddir") ;;
+    $'\001)')
+      if ((${#dirs[@]})); then
+        saved=${dirs[${#dirs[@]}-1]}
+        unset 'dirs[${#dirs[@]}-1]'
+        dir=${saved%%|*}
+        olddir=${saved#*|}
+      fi
+      ;;
+    $'\001`') ;;
+    *) check_segment "$segment" ;;
+  esac
+done < <(split_command "$command")
 
 exit 0
