@@ -5,6 +5,8 @@ description: Rules for figures, charts, maps, and tables, and how to choose a to
 
 # Visualization
 
+When another visualization skill, such as the built-in `dataviz` skill, conflicts with these rules, use these rules.
+
 ## Show the data
 
 - Show the raw data with each summary. Do not show a summary alone.
