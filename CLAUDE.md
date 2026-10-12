@@ -24,7 +24,7 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - `README.md` and `CONTRIBUTING.md`.
   - Recent commit messages and branch names.
   - The PR template, if one exists.
-  - For each of these files that the repository does not have, look in the owner's `.github` repository.
+  - If the repository has no `CONTRIBUTING.md` or no PR template, look for that file in the owner's `.github` repository.
 - In repositories owned by `RMI`, also read `https://github.com/RMI/practices`.
   - Read `git.md`, `pull_request.md`, and `version.md` with `gh` before the first commit or PR in a session.
   - Repository conventions override it. It overrides the fallback rules below.
