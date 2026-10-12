@@ -111,11 +111,12 @@ The script needs `jq` on `PATH`.
 ```
 
 The three git rules in `CLAUDE.md` are text that Claude can ignore.
-Two settings enforce them:
+These settings enforce them:
 
 - A deny rule blocks merges.
 - A hook blocks commits to the default branch and asks you to approve all other commits.
-- A hook asks you to approve each new PR and each merge through `gh`.
+- A hook asks you to approve each new PR through `gh`.
+  It also asks for each merge that the deny rule does not block, for example through `gh api`.
 - A hook asks you to approve each local merge, pull, or push that changes the default branch.
 
 Add this rule to `permissions.deny` in `~/.claude/settings.json`:
@@ -143,6 +144,7 @@ The hook needs `jq`.
 
 Add this entry to `hooks.PreToolUse` too.
 It asks you to approve each new PR and each merge through `gh`.
+It needs `jq`.
 
 ```
 {
@@ -159,6 +161,7 @@ It asks you to approve each new PR and each merge through `gh`.
 
 Add this entry to `hooks.PreToolUse` too.
 It asks you to approve each local merge, pull, or push that changes the default branch.
+It needs `jq`.
 
 ```
 {
