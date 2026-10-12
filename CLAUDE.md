@@ -24,10 +24,15 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - `README.md` and `CONTRIBUTING.md`.
   - Recent commit messages and branch names.
   - The PR template, if one exists.
-- Before the first commit or PR in a session, read the owner's organization-wide conventions with `gh`, if they exist:
-  - Its `.github` repository: use its `CONTRIBUTING.md` or PR template when the repository has none.
-  - Its practices repository: `<owner>/practices`, or a repository that the README or `CONTRIBUTING.md` links to. List its files and read the ones on Git, PRs, and versions.
-  - Order of precedence: repository conventions, then the `.github` files, then the practices repository, then the fallback rules below.
+- Then read the owner's organization-wide conventions with `gh`, if they exist:
+  - The practices repository:
+    - Use the one that the README or `CONTRIBUTING.md` names as its practices guide.
+    - If none is named, check `<owner>/practices`.
+    - List its files. Read the files on Git, PRs, and versions.
+  - The `.github` repository: its `CONTRIBUTING.md` or PR template, when the repository has none.
+- Repository conventions override the practices repository.
+  The practices repository overrides the `.github` files.
+  All three override the fallback rules below.
 - Follow the conventions for base branch, branch names, commits, and PR format.
   - Do the steps they require, for example a draft PR or an AI-use statement.
   - Where they say nothing, use the rules below.
