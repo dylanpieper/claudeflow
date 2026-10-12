@@ -4,6 +4,7 @@
 #   `git merge` while the default branch is checked out,
 #   `git pull` of a different branch into the default branch,
 #   `git push` that updates the default branch on the remote.
+# Asks the user to approve each branch deletion, local or remote, unless the branch is merged into the default branch.
 # Asks for each command that mentions `git` when `jq` is missing, because the hook cannot parse it.
 # Other commands get no decision.
 # Limits: the hook reads the command text only.
@@ -71,6 +72,28 @@ is_default() {
   fi
 }
 
+# Succeeds when ref $3 is merged into the default branch of remote $2 in repo $1.
+# Without a remote HEAD, the remote or local main or master counts as default.
+is_merged() {
+  local base
+  git -C "$1" rev-parse -q --verify "$3^{commit}" >/dev/null || return 1
+  base=$(git -C "$1" symbolic-ref -q "refs/remotes/$2/HEAD" 2>/dev/null)
+  if [[ -z $base ]]; then
+    for base in "refs/remotes/$2/main" "refs/remotes/$2/master" refs/heads/main refs/heads/master; do
+      git -C "$1" rev-parse -q --verify "$base" >/dev/null && break
+      base=
+    done
+  fi
+  [[ -n $base ]] && git -C "$1" merge-base --is-ancestor "$3" "$base"
+}
+
+# Asks before deleting branch $3 with ref $4 in repo $1, unless it is merged into the default branch of remote $2.
+check_delete() {
+  is_default "$1" "$2" "$3" && ask "Approve deleting the default branch ($3)."
+  is_merged "$1" "$2" "$4" ||
+    ask "Approve deleting $3. It is not merged into the default branch, or the hook cannot check."
+}
+
 unquote() {
   local s=${1#[\"\']}
   echo "${s%[\"\']}"
@@ -124,15 +147,21 @@ check_git() {
 
   local sub=${t[i]}
   ((i++))
-  [[ $sub =~ ^(merge|pull|push)$ ]] || return 0
+  [[ $sub =~ ^(merge|pull|push|branch)$ ]] || return 0
 
   local -a pos=()
-  local all=0 tags=0
+  local all=0 tags=0 del=0 tracking=0
   while ((i < n)); do
     case ${t[i]} in
       --abort | --quit) return 0 ;;
       --all | --mirror) all=1 ;;
       --tags) tags=1 ;;
+      --delete) del=1 ;;
+      --remotes) tracking=1 ;;
+      -[dDr] | -[dDr][dDrf] | -[dDrf][dDr])
+        [[ ${t[i]} == *[dD]* ]] && del=1
+        [[ ${t[i]} == *r* ]] && tracking=1
+        ;;
       -*)
         if [[ ${t[i]} =~ $value_opt_re || ($sub == push && ${t[i]} == --recurse-submodules) ]]; then
           ((i++))
@@ -149,6 +178,12 @@ check_git() {
 
   local remote=${pos[0]:-origin} spec dst
   case $sub in
+    branch)
+      ((del && !tracking)) || return 0
+      for spec in "${pos[@]}"; do
+        check_delete "$repo" origin "$spec" "refs/heads/$spec"
+      done
+      ;;
     merge)
       [[ -n $branch ]] && is_default "$repo" origin "$branch" &&
         ask "Approve this merge into the default branch ($branch)."
@@ -164,6 +199,19 @@ check_git() {
       done
       ;;
     push)
+      if ((del)); then
+        for spec in "${pos[@]:1}"; do
+          spec=${spec#refs/heads/}
+          check_delete "$repo" "$remote" "$spec" "refs/remotes/$remote/$spec"
+        done
+        return 0
+      fi
+      for spec in "${pos[@]:1}"; do
+        [[ $spec == :* ]] || continue
+        spec=${spec#:}
+        spec=${spec#refs/heads/}
+        check_delete "$repo" "$remote" "$spec" "refs/remotes/$remote/$spec"
+      done
       ((all)) && ask "Approve this push of all branches, which includes the default branch."
       if ((${#pos[@]} <= 1)); then
         ((tags)) && return 0
