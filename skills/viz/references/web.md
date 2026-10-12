@@ -4,14 +4,23 @@
 
 - For static charts and charts with hover only, use `@observablehq/plot`.
   - It uses the same grammar as ggplot2: marks, scales, and facets.
-  - It makes a plain SVG. Apply the color and text rules in `SKILL.md` to it.
+  - It makes an SVG, or a `<figure>` that holds the SVG when the chart has a title, caption, or legend.
+  - Apply the color and text rules in `SKILL.md` to it.
 - Mount the chart in React:
   - Call `Plot.plot()` in a `useEffect` hook.
   - Append the result to a `useRef` element, and remove it in the cleanup function.
+- Make the chart fit its container.
+  - The default width is a fixed 640 px.
+  - Read the container width with a `ResizeObserver` and give it to the `width` option.
+  - Run `Plot.plot()` again when the width changes.
 - For hover, use the `tip` mark or the `tip` mark option.
-- For fixed data, render the SVG on the server or at build time.
-  - Give a virtual DOM to the `document` option of `Plot.plot()`.
+  - The `tip` needs Plot to run in the browser.
+- For filters, keep the filter in React state and run `Plot.plot()` again with the filtered data.
+  - For brushed or linked views, use D3.
+- For a static chart with fixed data, render the SVG on the server or at build time.
+  - Give a DOM, such as jsdom or linkedom, to the `document` option of `Plot.plot()`.
   - The page then has no chart JavaScript.
+- For access, set the `ariaLabel` and `ariaDescription` options of `Plot.plot()`.
 
 ## plotly.js
 
