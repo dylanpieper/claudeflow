@@ -54,7 +54,7 @@ Hooks and permission settings always apply. No instruction file can override the
 - **[audit-instructions](skills/audit-instructions/SKILL.md)**: Run `/audit-instructions` to check for outdated instructions and open a PR with fixes.
 - **[rules/r.md](rules/r.md)**: R preferences. Loads only for R files.
 - **[rules/python.md](rules/python.md)**: Python and frontend preferences. Loads only for Python and frontend files.
-- **[rules/data.md](rules/data.md)**: Data stack and data dictionary rules. Loads only for data files and `data-dict.yaml`.
+- **[rules/data.md](rules/data.md)**: Data stack and data dictionary rules. Loads for data files, `data-dict.yaml`, and R, Python, or SQL files.
 
 ## Installed tools
 

@@ -54,6 +54,7 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - Give each function or pipeline step one task and a contract: inputs, outputs, errors.
 - Put validation and error handling in the small units.
 - Keep high-level functions as thin wrappers.
+- Use real data at runtime when it is available. Do not hardcode data or fixes.
 
 ## Writing
 
@@ -80,5 +81,5 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - These load only after you read a matching file:
   - `~/.claude/rules/r.md`: R files.
   - `~/.claude/rules/python.md`: Python or frontend files.
-  - `~/.claude/rules/data.md`: data files and `data-dict.yaml`.
+  - `~/.claude/rules/data.md`: data files, `data-dict.yaml`, and R, Python, or SQL files.
 - In a project with no matching files yet, read the rule file before you write code.

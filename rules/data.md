@@ -1,18 +1,20 @@
 ---
 paths:
-  - "**/*.csv"
-  - "**/*.parquet"
-  - "**/*.xlsx"
-  - "**/*.duckdb"
-  - "**/*.sqlite"
-  - "**/data-dict.yaml"
+  - "**/*.{csv,tsv,parquet,xlsx,xls,json,ndjson,feather,arrow}"
+  - "**/*.{duckdb,ddb,sqlite,db}"
+  - "**/data-dict.{yaml,yml}"
+  - "**/*.{R,r,Rmd,qmd,py,ipynb,sql}"
 ---
+
+# Data
+
+A project `CLAUDE.md` or `AGENTS.md` overrides this file.
 
 ## Data stack
 
-- When you recommend a data stack, show alternatives in order of best fit.
-- Use real data at runtime when it is available. Do not hardcode data or fixes.
-- Large column scans and aggregations: use DuckDB, with Arrow or Parquet as necessary.
+- Recommend a modern data stack. Show alternatives in order of best fit.
+- Large or heavy work (power, memory, or storage): use DuckDB, with Arrow or Parquet as necessary.
+  - DuckDB is best for large column scans and aggregations.
   - Data lakes, cataloging, or multiple clients: use DuckLake.
   - Use the `duckdb-skills` plugin.
 - Small data with transactions or many small row reads and writes: use SQLite.
