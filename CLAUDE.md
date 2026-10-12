@@ -81,5 +81,5 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - These load only after you read a matching file:
   - `~/.claude/rules/r.md`: R files.
   - `~/.claude/rules/python.md`: Python or frontend files.
-  - `~/.claude/rules/data.md`: data files, `data-dict.yaml`, and R, Python, or SQL files.
+  - `~/.claude/rules/data.md`: data files, `data-dict.yaml`, and R, Python, notebook, Quarto, or SQL files.
 - In a project with no matching files yet, read the rule file before you write code.
