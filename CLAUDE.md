@@ -24,6 +24,9 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - `README.md` and `CONTRIBUTING.md`.
   - Recent commit messages and branch names.
   - The PR template, if one exists.
+- In repositories owned by `RMI`, also read `https://github.com/RMI/practices`.
+  - Read it with `gh` before the first commit or PR in a session.
+  - Repository conventions override it. It augments my Git workflow.
 - Follow the conventions for base branch, branch names, commits, and PR format.
   - Do the steps they require, for example a draft PR or an AI-use statement.
   - Where they say nothing, use the rules below.
