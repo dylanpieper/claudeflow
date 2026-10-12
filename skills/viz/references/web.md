@@ -13,7 +13,8 @@
   - The default width is 640 px. The SVG shrinks to fit a narrow container, but it does not grow past that width.
   - In the browser, read the container width with a `ResizeObserver` and give it to the `width` option.
   - Run `Plot.plot()` again when the width changes.
-  - On the server, set `width` to the widest layout width. The SVG then shrinks to fit smaller screens.
+  - On the server, set `width` to the most common layout width.
+  - Make sure that the text stays readable at the smallest width, because the SVG scales the text too.
 - For hover, use the `tip` mark or the `tip` mark option.
   - The `tip` needs Plot to run in the browser.
 - For filters, keep the filter in React state and run `Plot.plot()` again with the filtered data.
@@ -23,7 +24,8 @@
   - The page then has no chart JavaScript.
 - For access, follow the rules in "Data and access" below.
   - Set the `ariaLabel` and `ariaDescription` options of `Plot.plot()`.
-  - Plot does not add `role="img"`. Set it on the SVG, or on the container when Plot returns a `<figure>`.
+  - Plot does not add `role="img"`. Set it on the SVG, also when Plot returns a `<figure>`.
+  - Do not set `role="img"` on the `<figure>`. That hides the SVG label, title, caption, and legend.
 
 ## plotly.js
 
