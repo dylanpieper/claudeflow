@@ -23,7 +23,7 @@ flowchart TD
 
 - [CLAUDE.md](CLAUDE.md): rules for every session.
 - [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
-- [skills/](skills/): research-writing, viz, spatial, and audit-instructions.
+- [skills/](skills/): research-writing and viz.
 - [hooks/](hooks/): approval guards and a Markdown check.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
@@ -33,8 +33,8 @@ flowchart TD
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
 for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge,az,sf}-guard.sh hooks/md-list-check.sh \
   rules/{r,python,data,roborev}.md \
-  skills/{research-writing,spatial,audit-instructions,viz}/SKILL.md \
-  skills/viz/references/{r,grammar-style,python,web,maps}.md; do
+  skills/{research-writing,viz}/SKILL.md \
+  skills/viz/references/{r,grammar-style,python,web}.md; do
   curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
 done
 chmod +x ~/.claude/hooks/*.sh

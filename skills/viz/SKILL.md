@@ -1,6 +1,6 @@
 ---
 name: viz
-description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, Observable Plot, D3, Leaflet with OpenStreetMap, mapgl with MapLibre, gt). Use when you make or change a figure, chart, map, or table in any language.
+description: Rules for figures, charts, maps, and tables, and how to choose a tool (ggplot2, plotnine, plotly, Observable Plot, D3, Leaflet, mapgl, gt). Use when you make or change a figure, chart, map, or table in any language.
 ---
 
 # Visualization
@@ -53,6 +53,3 @@ Read the file for the tool that you use:
 - [references/grammar-style.md](references/grammar-style.md): ggplot2 and plotnine themes, color, text, fonts, and export.
 - [references/python.md](references/python.md): plotnine, seaborn, plotly, and great_tables.
 - [references/web.md](references/web.md): Observable Plot, plotly.js, and D3 in React.
-- [references/maps.md](references/maps.md): Leaflet, OpenStreetMap tiles, mapgl, vector tiles, and dense points.
-
-For spatial data and analysis, use the `spatial` skill.

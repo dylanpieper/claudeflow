@@ -34,7 +34,7 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 - For R and Python in one project, use `uv` for Python. For R, follow the rules above.
   - `uv` keeps the Python packages in `pyproject.toml`, `uv.lock`, and `.venv/`.
   - In R, call `reticulate::use_virtualenv(here::here(".venv"))` before the first Python call.
-  - Do not use `renv::use_python()`: it uses `pip` or `conda`, not `uv`. See [renv with Python](https://rstudio.github.io/renv/articles/python.html).
+  - Do not use `renv::use_python()`: it uses `pip` or `conda`, not `uv`.
 - Never use `install.packages()`, `remotes::install_github()`, or `devtools::install_github()`.
 
 ## Paths
@@ -51,14 +51,13 @@ These rules override the r-skills, which cover general style, tidyverse, rlang, 
 - Format every `.R` file after writing or changing it, with the project's formatter or Air (`air format <path>`).
 - Use `cli` for console output (e.g. `cli::cli_alert_success()`), not `cat()`, `message()`, or `print()`.
 - Clean column names with `janitor::clean_names()`.
-- For large data, prefer [`duckplyr`](https://duckplyr.tidyverse.org/) with `dplyr` verbs. `arrow` is also fine.
+- For large data, prefer `duckplyr` with `dplyr` verbs. `arrow` is also fine.
   - Read files with `read_parquet_duckdb()` or `read_csv_duckdb()`, not into memory first.
   - Convert an existing data frame with `as_duckdb_tibble()`.
   - Write results with `compute_parquet()`.
   - Do not use the deprecated `df_from_*()` or `as_duckplyr_tibble()`.
 - For an existing `.duckdb` database, use `dplyr` on a `duckdb` connection.
 - For figures, maps, and tables, use the viz skill.
-- For spatial data and analysis, use the spatial skill.
 
 ## Project stack
 
@@ -93,7 +92,7 @@ For complex projects:
 ### Apps
 
 - Use `shiny` with `bslib` for dashboards and quick prototypes.
-- Use [`shinyreact`](https://posit-dev.github.io/shinyreact/) when the UI needs custom React components or client-side interaction without a server round trip.
+- Use `shinyreact` when the UI needs custom React components or client-side interaction without a server round trip.
   - The server sends only data, via `reactive_output()`.
   - React renders the entire UI from `ui.tsx`, served by `page_react()`.
   - Never build UI in the server.
