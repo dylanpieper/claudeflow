@@ -79,9 +79,22 @@ The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude
     "cc-plugin-agents-md@builtin": {
       "options": { "instructionFiles": "claude-md-and-agents-md" }
     }
-  }
+  },
+  "enableArtifact": false,
+  "autoMemoryEnabled": false
 }
 ```
+
+`enableArtifact` turns off the Artifact tool. `autoMemoryEnabled` turns off auto-memory.
+After you turn off auto-memory, move the old memory folders to the Trash once.
+The first command lists the folders. The second command moves them to the Trash.
+
+```
+find ~/.claude/projects -mindepth 2 -maxdepth 2 -type d -name memory
+find ~/.claude/projects -mindepth 2 -maxdepth 2 -type d -name memory -exec trash {} +
+```
+
+The `trash` command is part of macOS 15 or later.
 
 Block direct pushes to the default branch in each repository.
 On the free plan, GitHub does not enforce this on private repositories.
