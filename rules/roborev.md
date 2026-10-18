@@ -8,6 +8,28 @@ The agent hook brings failing reviews back into the session.
   - If the post-commit hook is missing, ask before you run `roborev init`.
 - After you commit, run `roborev list --open`.
 - Handle failing reviews (fix or disprove each one) before you open or update a pull request.
+- Before you fix a finding, explain the fix to me. Wait for my OK before you edit.
+  - The finding and the proof that it is real.
+  - The change that you will make.
+  - When I type `/roborev-fix` or `/roborev-refine`, that is my OK for the edits in that run.
+    The commit hook still asks before each commit.
+- Before you commit a fix, choose to layer or rebuild:
+  - Rebuild commits that are not pushed yet.
+  - Never rebuild pushed commits. Put each fix to a pushed commit in a new commit.
+  - A commit is pushed if `git branch -r --contains <sha>` lists a remote branch.
+  - During `/roborev-refine`, commit each loop. After the run, rebuild the commits that are not pushed.
+    Then add the new SHA to each job that refine closed.
+- When you rebuild:
+  - Do not add commits that undo, redo, or patch earlier commits that are not pushed.
+  - Choose the best way, and tell me which way and why. For example:
+    - Change the last commit (HEAD only): `git commit --amend`.
+    - Fold a fix into an earlier commit: `git commit --fixup=<sha>`,
+      then `git rebase --autosquash $(git merge-base HEAD origin/<base>)`.
+      The fork point keeps the branch on its current base.
+    - Squash the commits that are not pushed into fewer commits.
+- Record each fix with `roborev comment --job <id>`.
+  - Give the SHA of the commit that holds the fix.
+  - When you rebuild, record the SHA after the last rewrite.
 - When I ask in plain words to review or fix a branch or pull request, use roborev, not another review tool:
   - Review: `roborev review --branch --wait`.
   - Read findings: `roborev show --job <id> --json`.
