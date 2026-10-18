@@ -24,14 +24,14 @@ flowchart TD
 - [CLAUDE.md](CLAUDE.md): rules for every session.
 - [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
 - [skills/](skills/): research-writing, viz, and dotenvx.
-- [hooks/](hooks/): approval guards and a Markdown check.
+- [hooks/](hooks/): approval guards, a Markdown check, and transcript redaction.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
 ## Install
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge,az,sf}-guard.sh hooks/md-list-check.sh \
+for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge,az,sf}-guard.sh hooks/md-list-check.sh hooks/transcript-redact.py \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,viz,dotenvx}/SKILL.md \
   skills/viz/references/{r,grammar-style,python,web}.md; do
@@ -73,6 +73,9 @@ The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude
         "matcher": "Write|Edit",
         "hooks": [{ "type": "command", "command": "$HOME/.claude/hooks/md-list-check.sh", "timeout": 10 }]
       }
+    ],
+    "SessionEnd": [
+      { "hooks": [{ "type": "command", "command": "python3 $HOME/.claude/hooks/transcript-redact.py", "timeout": 5 }] }
     ]
   },
   "pluginConfigs": {
@@ -212,4 +215,5 @@ claude plugin marketplace add andrewm4894/claude-log-cleaner
 claude plugin install log-cleaner@log-cleaner-marketplace
 ```
 
-`/log-cleaner:scan` scans the logs with TruffleHog (tested v3.99.2).
+At each session end, `transcript-redact.py` replaces the secrets that TruffleHog finds in the transcripts with `[REDACTED:<detector>]`.
+It scans the transcript of the session and the transcripts of the same project changed in the last day (tested with TruffleHog v3.99.2).
