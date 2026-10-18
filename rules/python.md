@@ -18,7 +18,6 @@ A project `CLAUDE.md` or `AGENTS.md` overrides this file.
   - Do not use `numpy`, `pandas`, or `polars` unless already used.
   - `duckdb` and `pyarrow` are fine alternatives, for example for large data or SQL-based work.
 - Use `plotnine` as your default visualization tool.
-- For spatial data and analysis, use the spatial skill. It allows `geopandas`.
 
 ## Paths
 

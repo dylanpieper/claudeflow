@@ -1,9 +1,5 @@
 # ggplot2 and plotnine style: themes, color, text, and export
 
-These rules come from the blog and talks of Cara Thompson
-([cararthompson.com](https://www.cararthompson.com/posts)).
-Each section links to its sources.
-
 The rules apply to ggplot2 (4.0 or later) and plotnine (0.15 or later).
 plotnine uses the same grammar as ggplot2.
 Each rule shows the ggplot2 code first.
@@ -42,10 +38,6 @@ A "plotnine" item shows a name or a gap that is different.
   - `legend.location = "plot"`. plotnine has no `legend_location`.
 - Remove grid lines that the reader does not need, for example `panel.grid.minor = element_blank()`.
 
-Sources:
-[From basic to Wow every time in no time with your own ggplot2 theme](https://www.cararthompson.com/talks/basic-to-wow-ggplot2/),
-[Optimising the use of colours for storytelling in a spaghetti plot](https://www.cararthompson.com/posts/2025-01-14-optimising-colours-in-a-spaghetti-plot/).
-
 ## Color
 
 - Keep the palette in a named vector or a dict. Get each color by its name.
@@ -67,13 +59,6 @@ Sources:
   - R: `colorblindr::cvd_grid(p)`;
   - plotnine: save the image and check it with a color vision deficiency simulator.
 
-Sources:
-[A simple trick for applying accessible colour palettes within dataviz](https://www.cararthompson.com/posts/2026-07-03-accessible-colour-palettes/),
-[Adapting ggplot2 legend shapes when using the dark contour trick](https://www.cararthompson.com/posts/2026-07-14-shapes-in-ggplot-legends/),
-[Picking semantic colours, then making them accessible and on-brand](https://www.cararthompson.com/posts/2025-07-03-bhf-workshop-how-to-pick-semantically-meaningful-colours/),
-[How to make data viz that matches your organisation's branding](https://www.cararthompson.com/posts/2022-01-24-creating-and-applying-bespoke-colour-schemes/creating-and-applying-bespoke-colour-schemes),
-[On-brand accessible dataviz](https://www.cararthompson.com/talks/on-brand-accessibility/).
-
 ## Emphasis
 
 - To show the focus, map a 0/1 flag to `alpha`.
@@ -84,11 +69,6 @@ Sources:
 - To show a risk zone, shade it with `annotate("rect", alpha = ...)`.
   - Mark the threshold with `geom_vline()`.
   - Label the threshold on the plot.
-
-Sources:
-[Using transparency to emphasise the story arc](https://www.cararthompson.com/posts/2022-08-10-todays-rstats-dataviz-make-it/),
-[Optimising the use of colours for storytelling in a spaghetti plot](https://www.cararthompson.com/posts/2025-01-14-optimising-colours-in-a-spaghetti-plot/),
-[RiskyViz](https://www.cararthompson.com/talks/riskyviz/).
 
 ## Text and labels
 
@@ -108,13 +88,6 @@ Sources:
   - `big.mark = ","` adds separators.
   - plotnine: `label_number(big_mark = ",")`. For `K` and `M`, set `scale` and `suffix`.
 - Wrap long axis labels in the scale, not in the data.
-
-Sources:
-[Level Up Your Labels](https://www.cararthompson.com/posts/2022-06-22-it-was-a-privilege-to/),
-[How to add space around the title of a ggplot the better way](https://www.cararthompson.com/posts/2022-06-10-todays-i-wish-id-looked/),
-[One solution to make text stand out against most backgrounds](https://www.cararthompson.com/posts/2023-01-06-creating-a-dataviz-with-smallish/),
-[Formatting numbers for easy readability in R](https://www.cararthompson.com/posts/2024-01-30-formatting-numbers-in-r/),
-[Align your axes](https://www.cararthompson.com/posts/2022-07-14-align-your-axes/align-your-axes).
 
 ## Fonts and export
 
@@ -142,17 +115,9 @@ fix_background <- function(plot) {
 }
 ```
 
-Sources:
-[Getting fonts to work in R](https://www.cararthompson.com/posts/2024-01-12-using-fonts-in-r-for-dataviz/),
-[Fixing awkward backgrounds in ggplot2](https://www.cararthompson.com/posts/2025-03-06-fixing-awkward-backgrounds-in-ggplot/).
-
 ## Parameterized plot functions
 
 - Calculate limits, color midpoints, and label padding from the full data, so that the plots stay comparable.
 - Give each threshold a default value, for example with `case_when(..., .default = ...)` in R.
 - Make the title and counts from the data, for example with `nrow()`.
 - Test the output with a snapshot test. In R, use `vdiffr::expect_doppelganger()`.
-
-Sources:
-[RiskyViz](https://www.cararthompson.com/talks/riskyviz/),
-[Align your axes](https://www.cararthompson.com/posts/2022-07-14-align-your-axes/align-your-axes).
