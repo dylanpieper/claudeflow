@@ -15,6 +15,9 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - Run each script by its literal path: `python3 <scratchpad>/probe_x.py`.
 - Do not use inline code (`python3 -c`, `Rscript -e`).
 - Do not make paths from shell variables.
+- To delete files or folders, move them to the Trash with `trash <path>` (macOS 15 or later).
+  - Do not use `rm -rf`.
+  - Use `rm` or `rm -r` only for temporary files and folders that you made in this session.
 
 ## Git and PRs
 
