@@ -29,6 +29,8 @@ My Claude Code setup.
   - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
   - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch,
     and before each deletion of a branch that is not merged.
+  - `az-guard.sh` asks before each `az` command that is not read-only, and shows the active tenant and subscription.
+  - `sf-guard.sh` asks before each `sf` or `sfdx` command that is not read-only, and shows the target org.
   - `md-list-check.sh` sends each one-item list or sub-list in a changed Markdown file back to Claude.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
@@ -36,7 +38,7 @@ My Claude Code setup.
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh hooks/md-list-check.sh \
+for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge,az,sf}-guard.sh hooks/md-list-check.sh \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,spatial,audit-instructions,viz}/SKILL.md \
   skills/viz/references/{r,grammar-style,python,web,maps}.md; do
@@ -63,8 +65,14 @@ The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude
             "timeout": 10
           },
           { "type": "command", "command": "$HOME/.claude/hooks/gh-pr-guard.sh", "timeout": 10 },
-          { "type": "command", "command": "$HOME/.claude/hooks/git-merge-guard.sh", "timeout": 10 }
+          { "type": "command", "command": "$HOME/.claude/hooks/git-merge-guard.sh", "timeout": 10 },
+          { "type": "command", "command": "$HOME/.claude/hooks/az-guard.sh", "timeout": 10 },
+          { "type": "command", "command": "$HOME/.claude/hooks/sf-guard.sh", "timeout": 10 }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell|Monitor",
+        "hooks": [{ "type": "command", "command": "$HOME/.local/bin/dcg" }]
       }
     ],
     "PostToolUse": [
@@ -109,6 +117,45 @@ gh api repos/{owner}/{repo}/rulesets --method POST --input - <<'EOF'
 }
 EOF
 ```
+
+Install [destructive_command_guard](https://github.com/Dicklesworthstone/destructive_command_guard) (`dcg`) v0.15.3.
+It guards destructive shell commands.
+
+- `--no-configure` stops the installer from changing `settings.json`, other agents, and shell rc files.
+  Add the `dcg` entry in the JSON above yourself.
+- `--verify` runs a self-test after the install.
+
+```
+curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/v0.15.3/install.sh \
+  | bash -s -- --version v0.15.3 --no-configure --verify
+```
+
+The binary goes to `~/.local/bin/dcg`. Make sure that this folder is on your `PATH`.
+
+By default, dcg blocks each match. Put this in `~/.config/dcg/config.toml`.
+
+- `default_mode = "ask"` asks for approval on each match, including critical rules.
+- The `deny` rules always block a recursive delete of `/` or `~`, `git reset --hard`, and each form of force push.
+
+```
+[policy]
+default_mode = "ask"
+
+[policy.rules]
+"core.filesystem:rm-rf-root-home" = "deny"
+"core.filesystem:rm-r-f-separate-root-home" = "deny"
+"core.filesystem:rm-recursive-force-root-home" = "deny"
+"core.git:reset-hard" = "deny"
+"core.git:push-force-long" = "deny"
+"core.git:push-force-short" = "deny"
+"core.git:push-force-refspec" = "deny"
+```
+
+dcg has no setting that denies all critical rules and asks for the rest.
+Run `dcg explain --format json '<command>'` and read `outcome` to see what a command does.
+
+dcg rewrites its own hook entry in `settings.json` each time it runs (`self_heal_hook`).
+It moves the entry to the top of `PreToolUse` and changes `$HOME` to an absolute path.
 
 Tools and plugins:
 
