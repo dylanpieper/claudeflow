@@ -23,7 +23,7 @@ flowchart TD
 
 - [CLAUDE.md](CLAUDE.md): rules for every session.
 - [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
-- [skills/](skills/): research-writing and viz.
+- [skills/](skills/): research-writing, viz, and dotenvx.
 - [hooks/](hooks/): approval guards and a Markdown check.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
@@ -33,7 +33,7 @@ flowchart TD
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
 for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge,az,sf}-guard.sh hooks/md-list-check.sh \
   rules/{r,python,data,roborev}.md \
-  skills/{research-writing,viz}/SKILL.md \
+  skills/{research-writing,viz,dotenvx}/SKILL.md \
   skills/viz/references/{r,grammar-style,python,web}.md; do
   curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
 done
@@ -191,3 +191,25 @@ claude plugin install slidecrafting@slidecrafting
 ```
 
 Run `roborev init` in each repository that you want to review.
+
+## Secrets and logs
+
+Session transcripts in `~/.claude/projects/` keep secrets as plain text.
+The dotenvx skill runs each command as `dotenvx run --redact -- <command>`.
+Do not use `dotenvx run -- claude`: the model and the transcript get the plain values.
+
+[claude-log-cleaner](https://github.com/andrewm4894/claude-log-cleaner) v2.8.0 deletes files older than 7 days at each session end.
+It deletes from `debug/`, `file-history/` (rewind history), `plans/`, `projects/` (transcripts), `shell-snapshots/`, and `todos/`.
+The files do not go to the Trash.
+Set the retention before you install (default 24 hours).
+If the config file exists, change only `retention_hours`.
+
+```
+curl -sfS "https://dotenvx.sh?version=2.38.0" | sh
+brew install trufflehog
+[ -f ~/.claude/log-cleaner-config.json ] || echo '{"retention_hours": 168, "clean_on_session_end": true, "dry_run": false}' > ~/.claude/log-cleaner-config.json
+claude plugin marketplace add andrewm4894/claude-log-cleaner
+claude plugin install log-cleaner@log-cleaner-marketplace
+```
+
+`/log-cleaner:scan` scans the logs with TruffleHog (tested v3.99.2).
