@@ -7,7 +7,22 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parent.parent / "hooks" / "sf-guard.sh"
 BASH = shutil.which("bash") or "/bin/bash"
-JQ_DIR = str(Path(shutil.which("jq")).parent)
+JQ = shutil.which("jq")
+AWK = shutil.which("awk")
+pytestmark = pytest.mark.skipif(JQ is None, reason="jq is not installed")
+
+
+def tool_path(tmp_path, fakes=None):
+    """Returns a PATH with only jq, awk, and the fake CLIs in `fakes` (name to stdout)."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    for tool in (JQ, AWK):
+        (bin_dir / Path(tool).name).symlink_to(tool)
+    for name, stdout in (fakes or {}).items():
+        cli = bin_dir / name
+        cli.write_text(f"#!/bin/sh\necho '{stdout}'\n")
+        cli.chmod(0o755)
+    return str(bin_dir)
 
 
 def run(command, path=None):
@@ -80,12 +95,7 @@ def test_read_only_passes(command):
 
 
 def fake_cli(tmp_path, name, org):
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    cli = bin_dir / name
-    cli.write_text(f"#!/bin/sh\necho '{json.dumps({'result': [{'value': org}]})}'\n")
-    cli.chmod(0o755)
-    return f"{bin_dir}:{JQ_DIR}:/usr/bin:/bin"
+    return tool_path(tmp_path, {name: json.dumps({"result": [{"value": org}]})})
 
 
 def reason(command, path=None):
@@ -99,12 +109,25 @@ def reason(command, path=None):
         ("sf project deploy start --target-org=prod", "Target org (from --target-org): prod"),
         ("sfdx force:source:deploy -u prod", "Target org (from -u): prod"),
         ("sfdx force:source:deploy --targetusername prod", "Target org (from --targetusername): prod"),
-        ("sf package version create -v hub", "Target org (from -v): hub"),
         ("sf project deploy start -o --dry-run", "Target org (from -o): unknown"),
+        ("sf project deploy start -o=prod", "Target org (from -o): prod"),
+        ("sf project deploy start -oprod", "Target org (from -o): prod"),
+        ("sfdx force:source:deploy -u=prod", "Target org (from -u): prod"),
+        ("SF_TARGET_ORG=prod sf project deploy start", "Target org (from SF_TARGET_ORG): prod"),
+        ('sf data update record -o prod -s Account -i 001 -v "Name=x"', "Target org (from -o): prod"),
+        ("sf package version create -v hub", "Dev Hub (from -v): hub"),
+        ("sf org create scratch -v=hub -f def.json", "Dev Hub (from -v): hub"),
+        ("sf package create --target-dev-hub hub -n P", "Dev Hub (from --target-dev-hub): hub"),
     ],
 )
 def test_org_comes_from_the_command(command, expected, tmp_path):
     assert expected in reason(command, path=fake_cli(tmp_path, "sf", "dev-sandbox"))
+
+
+def test_values_flag_is_not_an_org(tmp_path):
+    text = reason('sf data update record -o prod -s Account -i 001 -v "Name=x"', path=fake_cli(tmp_path, "sf", "dev"))
+    assert "Name=x" not in text
+    assert "Dev Hub" not in text
 
 
 def test_org_flag_from_other_command_is_ignored(tmp_path):
@@ -118,8 +141,8 @@ def test_default_org_from_sfdx(tmp_path):
     assert "Target org (default): legacy-org" in text
 
 
-def test_reason_without_cli():
-    assert "not on PATH" in reason("sf project deploy start", path=f"{JQ_DIR}:/usr/bin:/bin")
+def test_reason_without_cli(tmp_path):
+    assert "not on PATH" in reason("sf project deploy start", path=tool_path(tmp_path))
 
 
 def test_missing_jq_asks_for_sf_commands():

@@ -62,7 +62,7 @@ readonly_re='^(show|list|get|query|exists|version|find|help|check-[a-z-]+|(show|
 redirect_re='^[0-9]*[<>&]'
 
 ask() {
-  local context sub=$1
+  local context sub=$1 envs=$2
   if command -v az >/dev/null; then
     context=$(az account show -o json --only-show-errors 2>/dev/null |
       jq -r '"Tenant: \(.tenantDisplayName // "unknown") (\(.tenantId))\nSubscription: \(.name) (\(.id))\nUser: \(.user.name)"')
@@ -71,6 +71,7 @@ ask() {
     context="The Azure CLI is not on PATH, so the active tenant is unknown."
   fi
   [[ -n $sub ]] && context+=$'\n'"This command sets --subscription $sub."
+  [[ -n $envs ]] && context+=$'\n'"This command sets${envs}, so the tenant above may not apply."
   jq -n --arg r "Approve this Azure CLI command. It can change or delete resources."$'\n'"$context" '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
@@ -82,12 +83,20 @@ ask() {
 }
 
 # Checks the az call that starts after word $1 of the segment words in T.
+# Flags before the first subcommand word, such as --debug, are skipped.
 check_call() {
-  local i=$1 last="" sub=""
+  local i=$1 last="" sub="" envs="" j
   local n=${#T[@]}
+  for ((j = 0; j < i; j++)); do
+    [[ ${T[j]} =~ ^AZURE_[A-Z_]*= ]] && envs+=" ${T[j]}"
+  done
   for ((i = i + 1; i < n; i++)); do
     norm "${T[i]}"
-    [[ -z $NW || $NW == -* || $NW =~ $redirect_re ]] && break
+    [[ -z $NW || $NW =~ $redirect_re ]] && break
+    if [[ $NW == -* ]]; then
+      [[ -n $last ]] && break
+      continue
+    fi
     last=$NW
   done
   for ((; i < n; i++)); do
@@ -97,7 +106,7 @@ check_call() {
       --subscription) norm "${T[i + 1]}"; sub=$NW ;;
     esac
   done
-  [[ -z $last || $last =~ $readonly_re ]] || ask "$sub"
+  [[ -z $last || $last =~ $readonly_re ]] || ask "$sub" "$envs"
 }
 
 command=${command//$'\\\n'/ }

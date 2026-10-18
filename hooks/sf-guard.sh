@@ -73,13 +73,29 @@ is_sf() {
 }
 
 redirect_re='^[0-9]*[<>&]'
-org_flag_re='^(-o|--target-org|-u|--targetusername|-v|--target-dev-hub)$'
-org_eq_re='^(--target-org|--targetusername|--target-dev-hub)=(.*)$'
+
+# If NW is one of the flags in $2..., sets FN to the flag and FV to its value and returns 0.
+# $1 is the index of NW in T. Reads -o prod, -o=prod, -oprod, --target-org prod, and --target-org=prod.
+flag_at() {
+  local w=$NW name
+  for name in "${@:2}"; do
+    if [[ $w == "$name" ]]; then
+      FN=$name; norm "${T[$1 + 1]}"
+      [[ $NW == -* ]] && FV="" || FV=$NW
+      return 0
+    elif [[ $w == "$name="* ]]; then
+      FN=$name; FV=${w#*=}; return 0
+    elif [[ $name != --* && $w == "$name"?* ]]; then
+      FN=$name; FV=${w#"$name"}; return 0
+    fi
+  done
+  return 1
+}
 
 ask() {
-  local context org=$1 flag=$2 cli
-  if [[ -n $flag ]]; then
-    context="Target org (from $flag): ${org:-unknown}"
+  local context org=$1 org_src=$2 hub=$3 hub_src=$4 cli
+  if [[ -n $org_src ]]; then
+    context="Target org (from $org_src): ${org:-unknown}"
   else
     for cli in sf sfdx; do
       command -v "$cli" >/dev/null || continue
@@ -89,6 +105,7 @@ ask() {
     done
     context=${context:-"The Salesforce CLI is not on PATH, so the target org is unknown."}
   fi
+  [[ -n $hub_src ]] && context+=$'\n'"Dev Hub (from $hub_src): ${hub:-unknown}"
   jq -n --arg r "Approve this Salesforce CLI command. It can change or delete org data or metadata."$'\n'"$context" '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
@@ -100,30 +117,43 @@ ask() {
 }
 
 # Checks the sf call that starts after word $1 of the segment words in T.
+# Flags before the first subcommand word are skipped.
+# -o and -u set the target org. -v sets the Dev Hub only for package and org create commands,
+# because other commands use -v for other things, such as --values.
 check_call() {
-  local i=$1 org="" flag="" p
-  local -a path=() parts
+  local i=$1 org="" org_src="" hub="" hub_src="" p j
+  local -a path=() parts hub_flags=(--target-dev-hub --targetdevhubusername)
   local n=${#T[@]}
+  for ((j = 0; j < i; j++)); do
+    case ${T[j]} in
+      SF_TARGET_ORG=* | SFDX_DEFAULTUSERNAME=*) org_src=${T[j]%%=*}; org=${T[j]#*=} ;;
+      SF_TARGET_DEV_HUB=* | SFDX_DEFAULTDEVHUBUSERNAME=*) hub_src=${T[j]%%=*}; hub=${T[j]#*=} ;;
+    esac
+  done
   for ((i = i + 1; i < n; i++)); do
     norm "${T[i]}"
-    [[ -z $NW || $NW == -* || $NW =~ $redirect_re ]] && break
+    [[ -z $NW || $NW =~ $redirect_re ]] && break
+    if [[ $NW == -* ]]; then
+      ((${#path[@]})) && break
+      continue
+    fi
     read -ra parts <<<"${NW//:/ }"
     path+=("${parts[@]}")
   done
   [[ ${path[0]:-} == force ]] && path=("${path[@]:1}")
+  [[ ${path[0]:-} == package || "${path[*]:0:2}" == "org create" ]] && hub_flags+=(-v)
   for ((; i < n; i++)); do
     norm "${T[i]}"
-    if [[ $NW =~ $org_eq_re ]]; then
-      flag=${BASH_REMATCH[1]}; org=${BASH_REMATCH[2]}
-    elif [[ $NW =~ $org_flag_re ]]; then
-      flag=$NW; norm "${T[i + 1]}"
-      [[ $NW == -* ]] && org="" || org=$NW
+    if flag_at "$i" -o --target-org -u --targetusername; then
+      org_src=$FN; org=$FV
+    elif flag_at "$i" "${hub_flags[@]}"; then
+      hub_src=$FN; hub=$FV
     fi
   done
   for p in "${READONLY[@]}"; do
     [[ "${path[*]}" == "$p" ]] && return
   done
-  ask "$org" "$flag"
+  ask "$org" "$org_src" "$hub" "$hub_src"
 }
 
 command=${command//$'\\\n'/ }

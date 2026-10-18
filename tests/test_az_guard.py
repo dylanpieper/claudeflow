@@ -7,7 +7,22 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parent.parent / "hooks" / "az-guard.sh"
 BASH = shutil.which("bash") or "/bin/bash"
-JQ_DIR = str(Path(shutil.which("jq")).parent)
+JQ = shutil.which("jq")
+AWK = shutil.which("awk")
+pytestmark = pytest.mark.skipif(JQ is None, reason="jq is not installed")
+
+
+def tool_path(tmp_path, fakes=None):
+    """Returns a PATH with only jq, awk, and the fake CLIs in `fakes` (name to stdout)."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    for tool in (JQ, AWK):
+        (bin_dir / Path(tool).name).symlink_to(tool)
+    for name, stdout in (fakes or {}).items():
+        cli = bin_dir / name
+        cli.write_text(f"#!/bin/sh\necho '{stdout}'\n")
+        cli.chmod(0o755)
+    return str(bin_dir)
 
 
 def run(command, path=None):
@@ -92,14 +107,21 @@ def test_read_only_passes(command):
     assert decision(command) is None
 
 
+@pytest.mark.parametrize(
+    "command",
+    [
+        "az --only-show-errors group delete -n g --yes",
+        "az --debug vm delete -n v",
+        "az -o json group delete -n g",
+    ],
+)
+def test_global_flags_before_the_group_ask(command):
+    assert decision(command) == "ask"
+
+
 def fake_az(tmp_path):
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    az = bin_dir / "az"
     account = {"tenantId": "t-1", "tenantDisplayName": "Contoso", "name": "Prod", "id": "s-1", "user": {"name": "me@x"}}
-    az.write_text(f"#!/bin/sh\necho '{json.dumps(account)}'\n")
-    az.chmod(0o755)
-    return f"{bin_dir}:{JQ_DIR}:/usr/bin:/bin"
+    return tool_path(tmp_path, {"az": json.dumps(account)})
 
 
 def test_reason_shows_tenant_and_subscription(tmp_path):
@@ -116,8 +138,13 @@ def test_subscription_comes_from_the_az_call(tmp_path):
     assert "nope" not in out["permissionDecisionReason"]
 
 
-def test_reason_without_az_cli():
-    out = run("az group delete -n g", path=f"{JQ_DIR}:/usr/bin:/bin")
+def test_azure_env_prefix_is_shown(tmp_path):
+    out = run("AZURE_CONFIG_DIR=/other az group delete -n g", path=fake_az(tmp_path))
+    assert "AZURE_CONFIG_DIR=/other, so the tenant above may not apply" in out["permissionDecisionReason"]
+
+
+def test_reason_without_az_cli(tmp_path):
+    out = run("az group delete -n g", path=tool_path(tmp_path))
     assert "not on PATH" in out["permissionDecisionReason"]
 
 
