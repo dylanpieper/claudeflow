@@ -2,13 +2,13 @@
 
 My Claude Code setup.
 
+```mermaid
+flowchart TD
+  request["👤 request"] --> branch["🤖 branch"] --> change["🤖 change"] --> commit["👤 commit"]
+  commit --> review["🤖 review"]
+  review -- pass --> pr["👤 PR"] --> merge["👤 merge"]
+  review -- fail --> approve["👤 approve fix"] --> change
 ```
-👤 request → 🤖 branch → 🤖 change → 👤 commit → 🤖 review → 👤 PR → 👤 merge
-                              ▲                      │
-                              └──────── fail ────────┘
-```
-
-👤 A human acts. 🤖 Claude acts.
 
 ## Precedence
 
@@ -25,13 +25,6 @@ My Claude Code setup.
 - [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
 - [skills/](skills/): research-writing, viz, spatial, and audit-instructions.
 - [hooks/](hooks/): approval guards and a Markdown check.
-  - `git-commit-guard.sh` blocks commits to the default branch and asks before all other commits.
-  - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
-  - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch,
-    before each deletion of a branch that is not merged, and before each force push.
-  - `az-guard.sh` asks before each `az` command that is not read-only, and shows the active tenant and subscription.
-  - `sf-guard.sh` asks before each `sf` or `sfdx` command that is not read-only, and shows the target org.
-  - `md-list-check.sh` sends each one-item list or sub-list in a changed Markdown file back to Claude.
 - [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
 
 ## Install
