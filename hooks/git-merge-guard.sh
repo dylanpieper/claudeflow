@@ -4,6 +4,7 @@
 #   `git merge` while the default branch is checked out,
 #   `git pull` of a different branch into the default branch,
 #   `git push` that updates the default branch on the remote.
+# Asks the user to approve each force push to any branch: -f, --force, --force-with-lease, or a + refspec.
 # Asks the user to approve each branch deletion, local or remote, unless the branch is merged into the default branch.
 # Asks for each command that mentions `git` when `jq` is missing, because the hook cannot parse it.
 # Other commands get no decision.
@@ -150,10 +151,12 @@ check_git() {
   [[ $sub =~ ^(merge|pull|push|branch)$ ]] || return 0
 
   local -a pos=()
-  local all=0 tags=0 del=0 tracking=0
+  local all=0 tags=0 del=0 tracking=0 force=0
   while ((i < n)); do
+    [[ $sub == push && ${t[i]} =~ ^-[nqvud46f]*f[nqvud46f]*$ ]] && force=1
     case ${t[i]} in
       --abort | --quit) return 0 ;;
+      -f | --force | --force-with-lease | --force-with-lease=*) force=1 ;;
       --all | --mirror) all=1 ;;
       --tags) tags=1 ;;
       --delete) del=1 ;;
@@ -199,6 +202,25 @@ check_git() {
       done
       ;;
     push)
+      for spec in "${pos[@]:1}"; do
+        [[ $spec == +* ]] && force=1
+      done
+      if ((force)); then
+        ((all)) && ask "Approve this force push of all branches, which includes the default branch."
+        if ((${#pos[@]} <= 1 && !tags)); then
+          [[ -n $branch ]] && is_default "$repo" "$remote" "$branch" &&
+            ask "Approve this force push to the default branch ($branch) on $remote."
+        fi
+        for spec in "${pos[@]:1}"; do
+          dst=${spec#+}
+          dst=${dst##*:}
+          dst=${dst#refs/heads/}
+          [[ $dst == HEAD ]] && dst=$branch
+          is_default "$repo" "$remote" "$dst" &&
+            ask "Approve this force push to the default branch ($dst) on $remote."
+        done
+        ask "Approve this force push to $remote. It rewrites commits on the remote branch."
+      fi
       if ((del)); then
         for spec in "${pos[@]:1}"; do
           spec=${spec#refs/heads/}

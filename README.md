@@ -28,7 +28,7 @@ My Claude Code setup.
   - `git-commit-guard.sh` blocks commits to the default branch and asks before all other commits.
   - `gh-pr-guard.sh` asks before each new PR, each `gh pr merge`, and each `gh api` call that can write.
   - `git-merge-guard.sh` asks before each local merge, pull, or push that changes the default branch,
-    and before each deletion of a branch that is not merged.
+    before each deletion of a branch that is not merged, and before each force push.
   - `az-guard.sh` asks before each `az` command that is not read-only, and shows the active tenant and subscription.
   - `sf-guard.sh` asks before each `sf` or `sfdx` command that is not read-only, and shows the target org.
   - `md-list-check.sh` sends each one-item list or sub-list in a changed Markdown file back to Claude.

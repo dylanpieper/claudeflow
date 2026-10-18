@@ -25,7 +25,7 @@ def make_repo(path, default="main", checkout=None, remote_head=True):
     return path
 
 
-def decision(command, cwd):
+def _run(command, cwd):
     result = subprocess.run(
         [BASH, str(SCRIPT)],
         input=json.dumps({"tool_name": "Bash", "tool_input": {"command": command}, "cwd": str(cwd)}),
@@ -35,7 +35,16 @@ def decision(command, cwd):
     )
     if not result.stdout.strip():
         return None
-    return json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"]
+    return json.loads(result.stdout)["hookSpecificOutput"]
+
+
+def decision(command, cwd):
+    out = _run(command, cwd)
+    return out and out["permissionDecision"]
+
+
+def reason(command, cwd):
+    return _run(command, cwd)["permissionDecisionReason"]
 
 
 @pytest.fixture
@@ -318,3 +327,74 @@ def test_deleting_an_unmerged_or_default_branch_asks(branches, command):
 def test_branch_without_delete_passes(branches):
     assert decision("git branch -m done finished", branches) is None
     assert decision("git branch new-work", branches) is None
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push -f",
+        "git push --force origin feature",
+        "git push --force-with-lease",
+        "git push --force-with-lease origin feature",
+        "git push --force-with-lease=feature:abc123 origin feature",
+        "git push --force-with-lease --force-if-includes origin feature",
+        "git push origin +feature",
+        "git push origin +HEAD:feature",
+        "git -C . push --force-with-lease",
+        "git commit --amend --no-edit && git push --force-with-lease",
+    ],
+)
+def test_force_push_to_any_branch_asks(on_feature, command):
+    assert decision(command, on_feature) == "ask"
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push",
+        "git push -u origin feature",
+        "git push --force-if-includes origin feature",
+        "git branch -f other HEAD",
+    ],
+)
+def test_push_without_force_passes(on_feature, command):
+    assert decision(command, on_feature) is None
+
+
+@pytest.mark.parametrize("command", ["git push -fu origin feature", "git push -uf origin feature", "git push -fq"])
+def test_bundled_force_flag_asks(on_feature, command):
+    assert decision(command, on_feature) == "ask"
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push --force-with-lease origin main",
+        "git push origin +main",
+        "git push -f origin HEAD:refs/heads/main",
+    ],
+)
+def test_force_push_to_default_names_it(on_feature, command):
+    assert reason(command, on_feature) == "Approve this force push to the default branch (main) on origin."
+
+
+def test_force_push_on_default_names_it(on_main):
+    assert reason("git push --force-with-lease", on_main) == "Approve this force push to the default branch (main) on origin."
+
+
+def test_force_push_to_feature_uses_general_message(on_feature):
+    assert "rewrites commits on the remote branch" in reason("git push --force-with-lease origin feature", on_feature)
+
+
+def test_force_push_of_all_branches_names_default(on_feature):
+    expected = "Approve this force push of all branches, which includes the default branch."
+    assert reason("git push -f --all", on_feature) == expected
+    assert reason("git push --mirror --force", on_feature) == expected
+
+
+def test_force_push_of_tags_on_default_does_not_name_it(on_main):
+    assert "rewrites commits on the remote branch" in reason("git push --force --tags", on_main)
+
+
+def test_push_option_value_with_f_is_not_force(on_feature):
+    assert decision("git push -ofoo origin feature", on_feature) is None
