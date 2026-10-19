@@ -31,10 +31,10 @@ flowchart TD
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
-for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge,az,sf}-guard.sh hooks/md-list-check.sh hooks/transcript-redact.py \
+for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh hooks/md-list-check.sh hooks/{transcript-redact,cli-guard}.py \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,viz,dotenvx}/SKILL.md \
-  skills/viz/references/{r,grammar-style,python,web}.md; do
+  skills/viz/references/{r,grammar-style,python,web}.md dcg/packs/macos.yaml; do
   curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
 done
 chmod +x ~/.claude/hooks/*.sh
@@ -59,8 +59,7 @@ The `pluginConfigs` entry makes Claude read `AGENTS.md` with `CLAUDE.md` (Claude
           },
           { "type": "command", "command": "$HOME/.claude/hooks/gh-pr-guard.sh", "timeout": 10 },
           { "type": "command", "command": "$HOME/.claude/hooks/git-merge-guard.sh", "timeout": 10 },
-          { "type": "command", "command": "$HOME/.claude/hooks/az-guard.sh", "timeout": 10 },
-          { "type": "command", "command": "$HOME/.claude/hooks/sf-guard.sh", "timeout": 10 }
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/cli-guard.py", "timeout": 10 }
         ]
       },
       {
@@ -141,10 +140,13 @@ curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/destructive_comma
 
 The binary goes to `~/.local/bin/dcg`. Make sure that this folder is on your `PATH`.
 
-By default, dcg blocks each match. Put this in `~/.config/dcg/config.toml`.
+By default, dcg blocks each match and turns on only the core, git, and disk packs. Put this in `~/.config/dcg/config.toml`.
 
 - `default_mode = "ask"` asks for approval on each match, including critical rules.
 - The `deny` rules always block a recursive delete of `/` or `~`, `git reset --hard`, and each form of force push.
+- `enabled` turns on the packs for cloud, database, and other CLIs.
+  It leaves out `strict_git`, which asks for each `git commit --amend` and `git rebase`.
+- `custom_paths` loads the [macOS pack](dcg/packs/macos.yaml) in this repo, because dcg has none.
 
 ```
 [policy]
@@ -158,6 +160,15 @@ default_mode = "ask"
 "core.git:push-force-long" = "deny"
 "core.git:push-force-short" = "deny"
 "core.git:push-force-refspec" = "deny"
+
+[packs]
+enabled = [
+  "apigateway", "backup", "careful_company_running_windows", "cdn", "cicd", "cloud", "containers",
+  "database", "dns", "email", "featureflags", "infrastructure", "kubernetes", "loadbalancer", "messaging",
+  "monitoring", "package_managers", "payment", "platform", "remote", "search", "secret_disclosure",
+  "secrets", "storage", "system", "windows",
+]
+custom_paths = ["~/.claude/dcg/packs/*.yaml"]
 ```
 
 dcg has no setting that denies all critical rules and asks for the rest.

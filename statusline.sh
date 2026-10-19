@@ -1,5 +1,6 @@
 #!/bin/bash
-# Status line: model | dir | Caveman badge | context used (tokens) | 5h and 7d plan usage with reset.
+# Status line: model | dir | Caveman badge | Salesforce org | Azure subscription | context used (tokens)
+# | 5h and 7d plan usage with reset.
 # Reads Claude Code status line JSON on stdin. No network calls.
 
 input=$(cat)
@@ -10,7 +11,7 @@ if ! command -v jq >/dev/null; then
 fi
 
 # Unit separator, not tab: IFS whitespace would merge empty fields and shift later values.
-IFS=$'\x1f' read -r sid model dir ctx_pct ctx_tok ctx_size h5 h5r d7 d7r < <(
+IFS=$'\x1f' read -r sid model dir ctx_pct ctx_tok ctx_size h5 h5r d7 d7r cwd transcript < <(
   echo "$input" | jq -r '[
     (.session_id // ""),
     (.model.display_name // ""),
@@ -21,7 +22,9 @@ IFS=$'\x1f' read -r sid model dir ctx_pct ctx_tok ctx_size h5 h5r d7 d7r < <(
     ((.rate_limits.five_hour.used_percentage | numbers | round) // ""),
     (.rate_limits.five_hour.resets_at // ""),
     ((.rate_limits.seven_day.used_percentage | numbers | round) // ""),
-    (.rate_limits.seven_day.resets_at // "")
+    (.rate_limits.seven_day.resets_at // ""),
+    (.workspace.current_dir // .cwd // ""),
+    (.transcript_path // "")
   ] | map(tostring) | join("\u001f")'
 )
 
@@ -84,6 +87,62 @@ if [[ $cave =~ ^[a-z-]+$ ]] && [ "$cave" != off ]; then
     *) label="Caveman:$cave" ;;
   esac
   parts+=($'\033[1;35m'"$label$RST")
+fi
+
+# Salesforce org and Azure subscription, read from the CLI config files, because the CLIs take seconds.
+# Shown after this session runs az, sf, or sfdx. The Salesforce org also shows in a Salesforce project.
+# A per-session cache keeps the scanned byte offset and the CLIs found, so each refresh reads only new bytes,
+# plus the last 64 KB again, in case a record was still being written. Caches older than 7 days are deleted.
+used=""
+if [ -n "$transcript" ] && [ -f "$transcript" ]; then
+  cache=""
+  [[ $sid =~ ^[A-Za-z0-9_-]+$ ]] && cache="$cfg/.statusline-cli/$sid"
+  offset=0
+  [ -n "$cache" ] && [ -f "$cache" ] && read -r offset used <"$cache"
+  [[ $offset =~ ^[0-9]+$ ]] || offset=0
+  size=$(wc -c <"$transcript" | tr -d ' ')
+  [ "$size" -lt "$offset" ] && { offset=0; used=""; }
+  start=$((offset > 65536 ? offset - 65536 : 0))
+  new=$(export LC_ALL=C; tail -c +$((start + 1)) "$transcript" |
+    grep -aoE '"name":"Bash","input":\{"command":"(\\.|[^"\\])*' | sed 's/\\n/ /g' |
+    grep -aoE '(^|[^[:alnum:]_./-])(az|sf|sfdx)[[:space:]]' | tr -cd 'adfsxz\n')
+  used=$(printf '%s\n%s\n' "$used" "$new" | tr ' ' '\n' | grep -E '^(az|sf|sfdx)$' | sort -u | tr '\n' ' ')
+  if [ -n "$cache" ]; then
+    [ -f "$cache" ] || find "${cache%/*}" -type f -mtime +7 -delete 2>/dev/null
+    mkdir -p "${cache%/*}" && printf '%s %s\n' "$size" "$used" >"$cache"
+  fi
+fi
+
+sf_root=""
+d=$cwd
+while [ -n "$d" ]; do
+  [ -f "$d/sfdx-project.json" ] && { sf_root=$d; break; }
+  [ "$d" = / ] || [ "$d" = . ] && break
+  d=$(dirname "$d")
+done
+
+if [ -n "$sf_root" ] || [[ " $used " == *" sf "* || " $used " == *" sfdx "* ]]; then
+  org=""
+  for f in ${sf_root:+"$sf_root/.sf/config.json" "$sf_root/.sfdx/sfdx-config.json"} \
+    "$HOME/.sf/config.json" "$HOME/.sfdx/sfdx-config.json"; do
+    [ -f "$f" ] || continue
+    org=$(jq -r '(."target-org" // .defaultusername // "") | strings
+      | explode | map(select(. >= 32 and (. < 127 or . > 159))) | implode' "$f" 2>/dev/null)
+    [ -n "$org" ] && break
+  done
+  [ -n "$org" ] && parts+=($'\033[36m'"sf $org$RST")
+fi
+
+if [[ " $used " == *" az "* ]]; then
+  profile=${AZURE_CONFIG_DIR:-$HOME/.azure}/azureProfile.json
+  if [ -f "$profile" ]; then
+    IFS=$'\x1f' read -r az_sub az_tenant < <(
+      LC_ALL=C sed $'1s/^\xEF\xBB\xBF//' "$profile" | jq -r 'first(.subscriptions[]? | select(.isDefault))
+        | [(.name // ""), (.tenantDefaultDomain // .tenantDisplayName // .tenantId // "")]
+        | map(explode | map(select(. >= 32 and (. < 127 or . > 159))) | implode) | join("\u001f")' 2>/dev/null
+    )
+    [ -n "$az_sub" ] && parts+=($'\033[36m'"az $az_sub$RST${az_tenant:+$DIM($az_tenant)$RST}")
+  fi
 fi
 
 if [ -n "$ctx_pct" ]; then

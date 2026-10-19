@@ -1,0 +1,79 @@
+schema_version: 1
+id: custom.macos
+name: macOS system tools
+version: 1.4.0
+description: |
+  Destructive macOS commands that the built-in packs do not cover: backups, security settings,
+  user accounts, keychains, system services, firmware settings, network services, and emptying the Trash.
+  The system.disk pack already covers diskutil.
+
+keywords:
+  - tmutil
+  - csrutil
+  - dscl
+  - sysadminctl
+  - dseditgroup
+  - security
+  - launchctl
+  - osascript
+  - networksetup
+  - nvram
+  - fdesetup
+  - spctl
+
+destructive_patterns:
+  - name: tmutil-delete
+    pattern: '\btmutil\s+(?:delete|deletelocalsnapshots|thinlocalsnapshots|disable|removedestination)\b'
+    executables: [tmutil]
+    severity: high
+    description: Deletes Time Machine backups, snapshots, or destinations, or turns off Time Machine.
+  - name: csrutil-disable
+    pattern: '\bcsrutil\s+(?:disable|clear|authenticated-root\s+disable)\b'
+    executables: [csrutil]
+    severity: critical
+    description: Turns off System Integrity Protection.
+  - name: user-delete
+    pattern: '\b(?:dscl\b.*\s-(?:delete|passwd)|sysadminctl\b.*\s-(?:deleteUser|resetPasswordFor))\b'
+    executables: [dscl, sysadminctl]
+    severity: critical
+    description: Deletes a user or directory record, or changes a password.
+  - name: admin-grant
+    pattern: '\b(?:dscl\b.*\s-(?:append|merge)\s+\S*/Groups/admin\b|dseditgroup\b.*\s-o\s+edit\b.*\badmin\b|sysadminctl\b.*\s-addUser\b.*\s-admin\b)'
+    executables: [dscl, dseditgroup, sysadminctl]
+    severity: critical
+    description: Adds a user to the admin group or creates an admin user.
+  - name: group-delete
+    pattern: '\bdseditgroup\b.*\s-o\s+delete\b'
+    executables: [dseditgroup]
+    severity: high
+    description: Deletes a local group.
+  - name: keychain-delete
+    pattern: '\bsecurity\s+delete-[\w-]+'
+    executables: [security]
+    severity: high
+    description: Deletes a keychain, or an item, certificate, or identity in a keychain.
+  - name: launchctl-stop
+    pattern: '\blaunchctl\s+(?:unload|bootout|disable|remove|stop|kill)\b'
+    executables: [launchctl]
+    severity: high
+    description: Stops, removes, or turns off a system or user service.
+  - name: empty-trash
+    pattern: '(?i)\bosascript\b.*\bempty\b.*\btrash\b'
+    executables: [osascript]
+    severity: high
+    description: Empties the Trash, so moved files cannot be restored.
+  - name: networksetup-remove
+    pattern: '\bnetworksetup\s+-(?:remove|delete)\w*'
+    executables: [networksetup]
+    severity: medium
+    description: Removes a network service, location, or preferred network.
+  - name: nvram-clear
+    pattern: '\bnvram\s+-[cd]\b'
+    executables: [nvram]
+    severity: high
+    description: Clears or deletes firmware variables.
+  - name: security-off
+    pattern: '\b(?:fdesetup\s+(?:disable|remove|removeuser)|spctl\s+--(?:master|global)-disable)\b'
+    executables: [fdesetup, spctl]
+    severity: critical
+    description: Turns off FileVault or Gatekeeper.
