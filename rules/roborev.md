@@ -7,7 +7,16 @@ The agent hook brings failing reviews back into the session.
   - It shows the setup state and the current commands.
   - If the post-commit hook is missing, ask before you run `roborev init`.
 - After you commit, run `roborev list --open`.
-- Handle failing reviews (fix or disprove each one) before you open or update a pull request.
+- Handle failing reviews (fix, skip, or disprove each finding) before you open or update a pull request.
+- Fix a finding when it can happen in normal use or it causes harm, for example data loss or a security gap.
+- Skip the other findings, for example:
+  - a finding that needs input that normal work does not use (a rare edge case);
+  - a Low finding that has no effect in normal use;
+  - a request for a style or test-layout change only;
+  - a repeat of a finding that you skipped before.
+- Record each skip with the reason.
+- When two rounds in a row have only findings that you skip, stop the review loop.
+  This also applies during `/roborev-refine`. Tell me, then continue to the pull request.
 - Before you fix a finding, explain the fix to me. Wait for my OK before you edit.
   - The finding and the proof that it is real.
   - The change that you will make.
@@ -34,8 +43,8 @@ The agent hook brings failing reviews back into the session.
   - Review: `roborev review --branch --wait`.
   - Read findings: `roborev show --job <id> --json`.
   - Prove each finding before you edit.
-  - Record what you fixed or disproved: `roborev comment --job <id> -m "<what you fixed or disproved>"`.
+  - Record what you fixed, skipped, or disproved: `roborev comment --job <id> -m "<what you fixed, skipped, or disproved>"`.
   - Then run `roborev close <id>`.
-  - Do not close a review while a valid finding is still open.
+  - Do not close a review while a finding that you must fix is still open.
 - The roborev skills (`/roborev-fix`, `/roborev-refine`, and others) run only when I type them.
 - Before a pull request, suggest `/roborev-refine`.
