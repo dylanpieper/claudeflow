@@ -1,6 +1,6 @@
 # claudeflow
 
-My Claude Code setup.
+My prudent Claude Code setup for personal projects and work.
 
 ```mermaid
 flowchart TD
@@ -13,22 +13,24 @@ flowchart TD
 ## How it works
 
 - **Rules**: each session starts with the rules in [CLAUDE.md](CLAUDE.md).
-  - They set approval gates, shell habits, git conventions, and writing style.
-  - Rules for R, Python, and data load when Claude works on matching files.
-- **Skills** add knowledge for research writing, figures, and secrets when a task needs them.
-- **Approvals**: hooks ask me before each commit, pull request, and merge.
-  Claude cannot commit to the default branch.
-- **CLIs**: a hook asks before each call to a cloud or network CLI, such as `az`, `sf`, or `curl`.
-- **Destructive commands**: dcg asks before them in about 40 tools, DuckDB, and macOS.
-  It blocks a few, such as force push.
-- **Reviews**: roborev reviews each commit in the background.
-  Claude fixes the findings that matter and records the rest.
+  - Approval gates, shell habits, git conventions, and technical writing style.
+  - R, Python, and data preferences.
+- **Skills:** research writing style, visualization, and secrets when a task needs them.
+- **Approvals**: 
+  - I approve each commit, pull request, and merge.
+  - Claude cannot commit to the default branch.
+- **CLIs**: I approve each call to a sensitive CLI, such as `az`, `sf`, or `curl`.
+- **Destructive commands**: I approve of destructive commands via dcg.
+- **Reviews**: 
+  - roborev reviews each commit in the background.
+  - Claude fixes the findings when I approve.
 - **Secrets** stay out of the logs.
   - Claude runs each command that needs a secret through dotenvx, which redacts the output.
-  - At the end of each session, a hook redacts the keys that TruffleHog finds in the transcripts.
+  - At the end of each session, a hook redacts the keys that trufflehog finds in the transcripts.
 - **Logs** older than 7 days are deleted.
-- **Status line**: it shows the model, folder, Caveman mode, context, and plan use.
-  It also shows the Salesforce org or Azure subscription after Claude uses them.
+- **Status line** includes:
+  - Model, working directory, Caveman mode, context, and plan use.
+  - Azure subscription and Salesforce org after Claude uses them.
 
 ## Install
 
@@ -231,5 +233,5 @@ claude plugin marketplace add andrewm4894/claude-log-cleaner
 claude plugin install log-cleaner@log-cleaner-marketplace
 ```
 
-At each session end, `transcript-redact.py` replaces the secrets that TruffleHog finds in the transcripts with `[REDACTED:<detector>]`.
+At each session end, `transcript-redact.py` replaces the secrets that trufflehog finds in the transcripts with `[REDACTED:<detector>]`.
 It scans the transcript of the session and the transcripts of the same project changed in the last day (tested with TruffleHog v3.99.2).
