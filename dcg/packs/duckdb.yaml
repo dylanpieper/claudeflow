@@ -1,0 +1,48 @@
+schema_version: 1
+id: custom.duckdb
+name: DuckDB
+version: 1.1.0
+description: |
+  Destructive DuckDB SQL in the duckdb CLI, in Python or R calls that use duckdb, and in heredocs:
+  drops, truncates, deletes, updates, table changes, replaced objects, overwriting COPY, and shell escapes.
+  The rules match the command text of any command that mentions duckdb, so the SQL must be in an
+  argument or a heredoc. SQL in a file that the command reads (duckdb my.db < x.sql, -f x.sql, or a
+  Python script) is not checked.
+  Plain COPY ... TO (file export) does not match. It replaces an existing single file without a prompt.
+
+keywords:
+  - duckdb
+
+destructive_patterns:
+  - name: drop
+    pattern: '(?i)\bDROP\s+(?:(?:PERSISTENT|TEMP(?:ORARY)?)\s+)?(?:TABLE|VIEW|SCHEMA|DATABASE|INDEX|SEQUENCE|MACRO|TYPE|FUNCTION|SECRET)\b'
+    severity: critical
+    description: Drops a table, view, schema, database, or other object.
+  - name: truncate
+    pattern: '(?i)\bTRUNCATE\b'
+    severity: high
+    description: Deletes all rows of a table.
+  - name: delete
+    pattern: '(?i)\bDELETE\s+FROM\b'
+    severity: high
+    description: Deletes rows of a table.
+  - name: update
+    pattern: '(?i)\bUPDATE\s+\S+\s+SET\b'
+    severity: medium
+    description: Changes rows of a table.
+  - name: alter-drop-rename
+    pattern: '(?i)\bALTER\s+TABLE\b[^;]*\b(?:DROP|RENAME)\b'
+    severity: high
+    description: Drops or renames a column or table.
+  - name: create-or-replace
+    pattern: '(?i)\bCREATE\s+OR\s+REPLACE\s+(?:(?:PERSISTENT|TEMP(?:ORARY)?)\s+)?(?:TABLE|VIEW|MACRO|SECRET|TYPE|FUNCTION|SEQUENCE)\b'
+    severity: medium
+    description: Replaces an object that can already exist.
+  - name: copy-overwrite
+    pattern: '(?i)\bCOPY\b[^;]*\bTO\b[^;]*\bOVERWRITE(?:_OR_IGNORE)?\b'
+    severity: medium
+    description: Writes files over existing files.
+  - name: shell-escape
+    pattern: '(?:^|\s|["''])\.(?:shell|system)\b'
+    severity: medium
+    description: Runs a shell command from the duckdb CLI.

@@ -1,6 +1,6 @@
 # claudeflow
 
-My Claude Code setup.
+My prudent Claude Code setup for personal projects and work.
 
 ```mermaid
 flowchart TD
@@ -13,22 +13,24 @@ flowchart TD
 ## How it works
 
 - **Rules**: each session starts with the rules in [CLAUDE.md](CLAUDE.md).
-  - They set approval gates, shell habits, git conventions, and writing style.
-  - Rules for R, Python, and data load when Claude works on matching files.
-- **Skills** add knowledge for research writing, figures, and secrets when a task needs them.
-- **Approvals**: hooks ask me before each commit, pull request, and merge.
-  Claude cannot commit to the default branch.
-- **CLIs**: a hook asks before each call to a cloud or network CLI, such as `az`, `sf`, or `curl`.
-- **Destructive commands**: dcg asks before them in about 100 tools and in macOS.
-  It blocks a few, such as force push.
-- **Reviews**: roborev reviews each commit in the background.
-  Claude fixes the findings that matter and records the rest.
+  - Approval gates, shell habits, git conventions, and technical writing style.
+  - R, Python, and data preferences.
+- **Skills:** research writing style, visualization, and secrets when a task needs them.
+- **Approvals**: 
+  - I approve each commit, pull request, and merge.
+  - Claude cannot commit to the default branch.
+- **CLIs**: I approve each call to a sensitive CLI, such as `az`, `sf`, or `curl`.
+- **Destructive commands**: I approve of destructive commands via dcg.
+- **Reviews**: 
+  - roborev reviews each commit in the background.
+  - Claude fixes the findings when I approve.
 - **Secrets** stay out of the logs.
   - Claude runs each command that needs a secret through dotenvx, which redacts the output.
-  - At the end of each session, a hook redacts the keys that TruffleHog finds in the transcripts.
+  - At the end of each session, a hook redacts the keys that trufflehog finds in the transcripts.
 - **Logs** older than 7 days are deleted.
-- **Status line**: it shows the model, folder, Caveman mode, context, and plan use.
-  It also shows the Salesforce org or Azure subscription after Claude uses them.
+- **Status line** includes:
+  - Model, working directory, Caveman mode, context, and plan use.
+  - Azure subscription and Salesforce org after Claude uses them.
 
 ## Install
 
@@ -45,7 +47,7 @@ base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
 for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh hooks/md-list-check.sh hooks/{transcript-redact,cli-guard}.py \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,viz,dotenvx}/SKILL.md \
-  skills/viz/references/{r,grammar-style,python,web}.md dcg/packs/macos.yaml; do
+  skills/viz/references/{r,grammar-style,python,web}.md dcg/packs/{macos,duckdb}.yaml; do
   curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
 done
 chmod +x ~/.claude/hooks/*.sh
@@ -155,9 +157,8 @@ By default, dcg blocks each match and turns on only the core, git, and disk pack
 
 - `default_mode = "ask"` asks for approval on each match, including critical rules.
 - The `deny` rules always block a recursive delete of `/` or `~`, `git reset --hard`, and each form of force push.
-- `enabled` turns on the packs for cloud, database, and other CLIs.
-  It leaves out `strict_git`, which asks for each `git commit --amend` and `git rebase`.
-- `custom_paths` loads the [macOS pack](dcg/packs/macos.yaml) in this repo, because dcg has none.
+- `enabled` turns on the packs for CI/CD, cloud, containers, databases, platforms, remote copy, storage, and system tools.
+- `custom_paths` loads the [macOS and DuckDB packs](dcg/packs/) in this repo, because dcg has neither.
 
 ```
 [policy]
@@ -173,12 +174,7 @@ default_mode = "ask"
 "core.git:push-force-refspec" = "deny"
 
 [packs]
-enabled = [
-  "apigateway", "backup", "careful_company_running_windows", "cdn", "cicd", "cloud", "containers",
-  "database", "dns", "email", "featureflags", "infrastructure", "kubernetes", "loadbalancer", "messaging",
-  "monitoring", "package_managers", "payment", "platform", "remote", "search", "secret_disclosure",
-  "secrets", "storage", "system", "windows",
-]
+enabled = ["cicd", "cloud", "containers", "core", "database", "platform", "remote", "storage", "system"]
 custom_paths = ["~/.claude/dcg/packs/*.yaml"]
 ```
 
@@ -237,5 +233,5 @@ claude plugin marketplace add andrewm4894/claude-log-cleaner
 claude plugin install log-cleaner@log-cleaner-marketplace
 ```
 
-At each session end, `transcript-redact.py` replaces the secrets that TruffleHog finds in the transcripts with `[REDACTED:<detector>]`.
+At each session end, `transcript-redact.py` replaces the secrets that trufflehog finds in the transcripts with `[REDACTED:<detector>]`.
 It scans the transcript of the session and the transcripts of the same project changed in the last day (tested with TruffleHog v3.99.2).
