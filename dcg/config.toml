@@ -1,0 +1,24 @@
+# dcg configuration. Run `dcg init` for every option.
+
+[policy]
+# Block every matched rule outright.
+default_mode = "deny"
+
+[policy.packs]
+# Ask for approval on git rules, so the branch, commit, and rebase workflow still runs.
+"core.git" = "ask"
+
+[policy.rules]
+# Always block these git rules, even with approval.
+"core.git:reset-hard" = "deny"
+"core.git:read-tree-reset" = "deny"
+"core.git:clean-force" = "deny"
+"core.git:stash-clear" = "deny"
+"core.git:push-force-long" = "deny"
+"core.git:push-force-short" = "deny"
+"core.git:push-force-refspec" = "deny"
+
+[packs]
+# Packs for the tools in use. The custom macOS and DuckDB packs load from custom_paths.
+enabled = ["backup", "cicd", "cloud", "containers", "core", "database", "platform", "remote", "storage", "system"]
+custom_paths = ["~/.claude/dcg/packs/*.yaml"]

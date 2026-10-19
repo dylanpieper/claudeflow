@@ -107,35 +107,43 @@ def test_read_only_command_is_allowed(config, command):
     assert decision(config, command) == "allow"
 
 
-README = Path(__file__).resolve().parent.parent / "README.md"
+CONFIG = PACKS.parent / "config.toml"
 
 
 @pytest.fixture(scope="module")
-def readme_config(tmp_path_factory):
-    text = README.read_text()
-    block = text[text.index("```\n[policy]") + 4 :]
-    block = block[: block.index("```")]
+def shipped_config(tmp_path_factory):
     home = tmp_path_factory.mktemp("home")
     shutil.copytree(PACKS, home / ".claude" / "dcg" / "packs")
     path = home / "config.toml"
-    path.write_text(block)
+    shutil.copy(CONFIG, path)
     return path, home
 
 
 @pytest.mark.parametrize(
     "command, expected",
     [
-        ("az group delete -n rg --yes", "ask"),
-        ("csrutil disable", "ask"),
-        ("duckdb my.db -c 'DROP TABLE t'", "ask"),
-        ("kubectl delete namespace prod", "allow"),
-        ("psql -c 'drop table x'", "ask"),
+        ("az group delete -n rg --yes", "deny"),
+        ("csrutil disable", "deny"),
+        ("duckdb my.db -c 'DROP TABLE t'", "deny"),
+        ("psql -c 'drop table x'", "deny"),
+        ("rclone purge remote:dst", "deny"),
+        ("git branch -D old-feature", "ask"),
+        ("git checkout -- file.R", "ask"),
+        ("git reset --hard HEAD~1", "deny"),
+        ("git read-tree --reset -u HEAD", "deny"),
+        ("git clean -fd", "deny"),
+        ("git stash clear", "deny"),
+        ("git push --force origin b", "deny"),
+        ("git push -f origin b", "deny"),
+        ("git push origin +b", "deny"),
         ("git commit --amend --no-edit", "allow"),
+        ("git rebase --autosquash main", "allow"),
+        ("git push -u origin b", "allow"),
         ("tmutil listbackups", "allow"),
     ],
 )
-def test_readme_config(readme_config, command, expected):
-    path, home = readme_config
+def test_shipped_config(shipped_config, command, expected):
+    path, home = shipped_config
     result = subprocess.run(
         [DCG, "test", "-c", str(path), "--dialect", "posix", "--robot", command],
         capture_output=True,

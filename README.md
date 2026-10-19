@@ -20,7 +20,7 @@ flowchart TD
   - I approve each commit, pull request, and merge.
   - Claude cannot commit to the default branch.
 - **CLIs**: I approve each call to a sensitive CLI, such as `az`, `sf`, or `curl`.
-- **Destructive commands**: I approve of destructive commands via dcg.
+- **Destructive commands**: dcg blocks destructive commands.
 - **Reviews**: 
   - roborev reviews each commit in the background.
   - Claude fixes the findings when I approve.
@@ -47,7 +47,7 @@ base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
 for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh hooks/md-list-check.sh hooks/{transcript-redact,cli-guard}.py \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,viz,dotenvx}/SKILL.md \
-  skills/viz/references/{r,grammar-style,python,web}.md dcg/packs/{macos,duckdb}.yaml; do
+  skills/viz/references/{r,grammar-style,python,web}.md dcg/config.toml dcg/packs/{macos,duckdb}.yaml; do
   curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
 done
 chmod +x ~/.claude/hooks/*.sh
@@ -153,33 +153,23 @@ curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/destructive_comma
 
 The binary goes to `~/.local/bin/dcg`. Make sure that this folder is on your `PATH`.
 
-By default, dcg blocks each match and turns on only the core, git, and disk packs. Put this in `~/.config/dcg/config.toml`.
+By default, dcg blocks each match and turns on only the core, git, and disk packs.
+Copy [dcg/config.toml](dcg/config.toml) from this repo to `~/.config/dcg/config.toml`.
 
-- `default_mode = "ask"` asks for approval on each match, including critical rules.
-- The `deny` rules always block a recursive delete of `/` or `~`, `git reset --hard`, and each form of force push.
-- `enabled` turns on the packs for CI/CD, cloud, containers, databases, platforms, remote copy, storage, and system tools.
+```
+mkdir -p ~/.config/dcg && cp -i ~/.claude/dcg/config.toml ~/.config/dcg/config.toml
+```
+
+- `default_mode = "deny"` blocks each match in all packs.
+- `"core.git" = "ask"` asks for approval on git rules, such as `git branch -D` and `git checkout --`.
+  The branch, commit, amend, rebase, and push workflow does not match a rule.
+- The `deny` rules always block `git reset --hard`, `git read-tree --reset -u`, `git clean -f`, `git stash clear`, and each form of force push.
+- `enabled` turns on the packs for backup tools, CI/CD, cloud, containers, databases, platforms, remote copy, storage, and system tools.
 - `custom_paths` loads the [macOS and DuckDB packs](dcg/packs/) in this repo, because dcg has neither.
 
-```
-[policy]
-default_mode = "ask"
-
-[policy.rules]
-"core.filesystem:rm-rf-root-home" = "deny"
-"core.filesystem:rm-r-f-separate-root-home" = "deny"
-"core.filesystem:rm-recursive-force-root-home" = "deny"
-"core.git:reset-hard" = "deny"
-"core.git:push-force-long" = "deny"
-"core.git:push-force-short" = "deny"
-"core.git:push-force-refspec" = "deny"
-
-[packs]
-enabled = ["cicd", "cloud", "containers", "core", "database", "platform", "remote", "storage", "system"]
-custom_paths = ["~/.claude/dcg/packs/*.yaml"]
-```
-
-dcg has no setting that denies all critical rules and asks for the rest.
 Run `dcg explain --format json '<command>'` and read `outcome` to see what a command does.
+
+dcg reads the command text only. It does not open a script that a command runs, such as `bash run.sh` or `python3 run.py`.
 
 dcg rewrites its own hook entry in `settings.json` each time it runs (`self_heal_hook`).
 It moves the entry to the top of `PreToolUse` and changes `$HOME` to an absolute path.
