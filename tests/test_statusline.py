@@ -230,3 +230,36 @@ def test_config_fallbacks(cloud):
         json.dumps({"subscriptions": [{"name": "Dev", "isDefault": True, "tenantId": "abcd", "tenantDisplayName": "Contoso"}]})
     )
     assert "az Dev(Contoso)" in run(payload, tmp, home=home, extra={"AZURE_CONFIG_DIR": str(other)})
+
+
+def bang(path, command):
+    record = {"type": "user", "message": {"role": "user", "content": f"<bash-input> {command}</bash-input>"}}
+    path.write_text(json.dumps(record, separators=(",", ":")) + "\n")
+    return path
+
+
+@pytest.mark.parametrize(
+    ("command", "expected"),
+    [
+        ("az login", r"\| az Prod Sub"),
+        ("sf org list", r"\| sf global-org"),
+        ("echo azure is nice", r"^Opus \| plain$"),
+    ],
+    ids=["az", "sf", "no-cli"],
+)
+@pytest.mark.skipif(shutil.which("jq") is None, reason="jq not on PATH")
+def test_bang_command_turns_on_cloud_context(cloud, command, expected):
+    tmp, home, project, plain = cloud
+    payload = {"model": {"display_name": "Opus"}, "workspace": {"current_dir": str(plain)}, "transcript_path": str(bang(tmp / "t.jsonl", command))}
+    assert re.search(expected, run(payload, tmp, home=home))
+
+
+@pytest.mark.skipif(shutil.which("jq") is None, reason="jq not on PATH")
+def test_quoted_bash_input_in_tool_output_is_ignored(cloud):
+    tmp, home, project, plain = cloud
+    record = {"type": "user", "message": {"role": "user", "content": [
+        {"type": "tool_result", "tool_use_id": "t", "content": "<bash-input> az login</bash-input>"}]}}
+    path = tmp / "t.jsonl"
+    path.write_text(json.dumps(record, separators=(",", ":")) + "\n")
+    payload = {"model": {"display_name": "Opus"}, "workspace": {"current_dir": str(plain)}, "transcript_path": str(path)}
+    assert run(payload, tmp, home=home) == "Opus | plain"
