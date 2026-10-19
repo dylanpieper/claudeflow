@@ -45,14 +45,19 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 
 ## Writing
 
-- Write documentation in ASD-STE100 Simplified Technical English.
+- Write docs in ASD-STE100 Simplified Technical English.
 - In docs, state the requirements, environment, and package versions.
-- In documents, do not put comments in code blocks. Explain the outcome in the text around them.
+- In docs, do not put comments in code blocks. Explain the outcome in the text around them.
 - In Markdown, keep lines short.
   - Split a long item into a short lead line and sub-items.
   - Use a list only for two or more items. Write one item as a sentence.
   - This also applies to sub-lists. Write one sub-item as a sentence in its parent item.
 - Keep a change log and release versions for published work. Skip for a prototype.
+- Keep the README.md ultralight.
+  - Put details in separate docs only when there are two or more doc files.
+    Otherwise, keep the details in the README.md, as short as possible.
+  - Use the doc layout that the project already has, for example `docs/`, `vignettes/`, or a Quarto site.
+  - A language rule can set its own doc layout, for example vignettes in `rules/r.md`.
 
 ## Libraries and tools
 

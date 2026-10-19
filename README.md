@@ -10,24 +10,35 @@ flowchart TD
   review -- fail --> approve["👤 approve fix"] --> change
 ```
 
-## Precedence
+## How it works
 
-1. Hooks and permission settings.
-2. The two non-negotiable rules in [CLAUDE.md](CLAUDE.md).
-3. My instructions in a session.
-4. The project's `AGENTS.md` or `CLAUDE.md`.
-5. This repo.
-6. Skills and plugins.
-
-## Files
-
-- [CLAUDE.md](CLAUDE.md): rules for every session.
-- [rules/](rules/): R, Python, and data rules, which load for matching files, and roborev rules.
-- [skills/](skills/): research-writing, viz, and dotenvx.
-- [hooks/](hooks/): approval guards, a Markdown check, and transcript redaction.
-- [statusline.sh](statusline.sh): model, folder, caveman mode, context use, and plan use.
+- **Rules**: each session starts with the rules in [CLAUDE.md](CLAUDE.md).
+  - They set approval gates, shell habits, git conventions, and writing style.
+  - Rules for R, Python, and data load when Claude works on matching files.
+- **Skills** add knowledge for research writing, figures, and secrets when a task needs them.
+- **Approvals**: hooks ask me before each commit, pull request, and merge.
+  Claude cannot commit to the default branch.
+- **CLIs**: a hook asks before each call to a cloud or network CLI, such as `az`, `sf`, or `curl`.
+- **Destructive commands**: dcg asks before them in about 100 tools and in macOS.
+  It blocks a few, such as force push.
+- **Reviews**: roborev reviews each commit in the background.
+  Claude fixes the findings that matter and records the rest.
+- **Secrets** stay out of the logs.
+  - Claude runs each command that needs a secret through dotenvx, which redacts the output.
+  - At the end of each session, a hook redacts the keys that TruffleHog finds in the transcripts.
+- **Logs** older than 7 days are deleted.
+- **Status line**: it shows the model, folder, Caveman mode, context, and plan use.
+  It also shows the Salesforce org or Azure subscription after Claude uses them.
 
 ## Install
+
+Requirements:
+
+- macOS 15 or later, for the `trash` command.
+- Claude Code v2.1.285 or later.
+- `jq`, `python3`, `git`, Homebrew, and `uv`.
+
+Download the files to `~/.claude`:
 
 ```
 base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main

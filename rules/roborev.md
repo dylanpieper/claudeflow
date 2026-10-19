@@ -14,8 +14,9 @@ The agent hook brings failing reviews back into the session.
   - a Low finding that has no effect in normal use;
   - a request for a style or test-layout change only;
   - a repeat of a finding that you skipped before.
-- Record each skip with the reason.
-- When two rounds in a row have only findings that you skip, stop the review loop.
+- Record each skip or disproof with the reason:
+  `roborev comment --job <id> -m "skipped: <reason>"` or `-m "disproved: <reason>"`.
+- When two rounds in a row have only findings that you skip or disprove, stop the review loop.
   This also applies during `/roborev-refine`. Tell me, then continue to the pull request.
 - Before you fix a finding, explain the fix to me. Wait for my OK before you edit.
   - The finding and the proof that it is real.
