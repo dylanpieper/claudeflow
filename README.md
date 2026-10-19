@@ -19,7 +19,7 @@ flowchart TD
 - **Approvals**: hooks ask me before each commit, pull request, and merge.
   Claude cannot commit to the default branch.
 - **CLIs**: a hook asks before each call to a cloud or network CLI, such as `az`, `sf`, or `curl`.
-- **Destructive commands**: dcg asks before them in about 100 tools and in macOS.
+- **Destructive commands**: dcg asks before them in about 40 tools, DuckDB, and macOS.
   It blocks a few, such as force push.
 - **Reviews**: roborev reviews each commit in the background.
   Claude fixes the findings that matter and records the rest.
@@ -45,7 +45,7 @@ base=https://raw.githubusercontent.com/dylanpieper/claudeflow/main
 for f in CLAUDE.md statusline.sh hooks/{git-commit,gh-pr,git-merge}-guard.sh hooks/md-list-check.sh hooks/{transcript-redact,cli-guard}.py \
   rules/{r,python,data,roborev}.md \
   skills/{research-writing,viz,dotenvx}/SKILL.md \
-  skills/viz/references/{r,grammar-style,python,web}.md dcg/packs/macos.yaml; do
+  skills/viz/references/{r,grammar-style,python,web}.md dcg/packs/{macos,duckdb}.yaml; do
   curl -fsSL --create-dirs "$base/$f" -o ~/.claude/$f
 done
 chmod +x ~/.claude/hooks/*.sh
@@ -155,9 +155,8 @@ By default, dcg blocks each match and turns on only the core, git, and disk pack
 
 - `default_mode = "ask"` asks for approval on each match, including critical rules.
 - The `deny` rules always block a recursive delete of `/` or `~`, `git reset --hard`, and each form of force push.
-- `enabled` turns on the packs for cloud, database, and other CLIs.
-  It leaves out `strict_git`, which asks for each `git commit --amend` and `git rebase`.
-- `custom_paths` loads the [macOS pack](dcg/packs/macos.yaml) in this repo, because dcg has none.
+- `enabled` turns on the packs for CI/CD, cloud, containers, databases, platforms, remote copy, storage, and system tools.
+- `custom_paths` loads the [macOS and DuckDB packs](dcg/packs/) in this repo, because dcg has neither.
 
 ```
 [policy]
@@ -173,12 +172,7 @@ default_mode = "ask"
 "core.git:push-force-refspec" = "deny"
 
 [packs]
-enabled = [
-  "apigateway", "backup", "careful_company_running_windows", "cdn", "cicd", "cloud", "containers",
-  "database", "dns", "email", "featureflags", "infrastructure", "kubernetes", "loadbalancer", "messaging",
-  "monitoring", "package_managers", "payment", "platform", "remote", "search", "secret_disclosure",
-  "secrets", "storage", "system", "windows",
-]
+enabled = ["cicd", "cloud", "containers", "core", "database", "platform", "remote", "storage", "system"]
 custom_paths = ["~/.claude/dcg/packs/*.yaml"]
 ```
 
