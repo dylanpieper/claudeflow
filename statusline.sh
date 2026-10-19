@@ -90,7 +90,8 @@ if [[ $cave =~ ^[a-z-]+$ ]] && [ "$cave" != off ]; then
 fi
 
 # Salesforce org and Azure subscription, read from the CLI config files, because the CLIs take seconds.
-# Shown after this session runs az, sf, or sfdx. The Salesforce org also shows in a Salesforce project.
+# Shown after this session runs az, sf, or sfdx, as a Claude Bash call or as a ! command from the user.
+# The Salesforce org also shows in a Salesforce project.
 # A per-session cache keeps the scanned byte offset and the CLIs found, so each refresh reads only new bytes,
 # plus the last 64 KB again, in case a record was still being written. Caches older than 7 days are deleted.
 used=""
@@ -104,7 +105,8 @@ if [ -n "$transcript" ] && [ -f "$transcript" ]; then
   [ "$size" -lt "$offset" ] && { offset=0; used=""; }
   start=$((offset > 65536 ? offset - 65536 : 0))
   new=$(export LC_ALL=C; tail -c +$((start + 1)) "$transcript" |
-    grep -aoE '"name":"Bash","input":\{"command":"(\\.|[^"\\])*' | sed 's/\\n/ /g' |
+    grep -aoE '"name":"Bash","input":\{"command":"(\\.|[^"\\])*|"role":"user","content":"<bash-input>[^<]*' |
+    sed 's/\\n/ /g' |
     grep -aoE '(^|[^[:alnum:]_./-])(az|sf|sfdx)[[:space:]]' | tr -cd 'adfsxz\n')
   used=$(printf '%s\n%s\n' "$used" "$new" | tr ' ' '\n' | grep -E '^(az|sf|sfdx)$' | sort -u | tr '\n' ' ')
   if [ -n "$cache" ]; then
