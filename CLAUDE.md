@@ -26,6 +26,9 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - In an organization repository, also `<owner>/practices` and `<owner>/.github`.
 - Repository conventions win, then the practices repository, then `.github`, then these rules.
 - Do the steps that the conventions require, for example a draft PR or an AI-use statement.
+- In each PR description, name the model and its version, not only the tool.
+  - Put it in the AI-use statement or the attribution line: `Claude Code (<model> <version>)`.
+  - Name only the model that runs the main session, not subagent models.
 - Use one branch for one purpose.
 - On the base branch, or for an unrelated change, run `git fetch origin`,
   then `git switch --no-track -c <short-name> origin/<base>`.
