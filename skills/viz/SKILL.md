@@ -8,8 +8,9 @@ description: Rules for figures, charts, maps, and tables, and how to choose a to
 ## Show the data
 
 - Show the raw data with each summary. Do not show a summary alone.
+  For a large sample where the points overlap, show the distribution, for example a violin plot, a raincloud plot, or a box plot with the points or a density.
 - Do not use a bar chart with error bars for continuous data.
-- Use bar charts only for counts and proportions.
+- Use bar charts only for counts, proportions, and totals. Do not use them for means.
 - Put the sample size in each group label, for example `Group A (n = 24)`.
 - Order the groups by a value that has a meaning, not by alphabetical order without a reason.
 - Use a palette that is safe for color blindness. Give each group the same color in all figures.
@@ -21,7 +22,10 @@ description: Rules for figures, charts, maps, and tables, and how to choose a to
 - Label groups directly on the plot. Then remove the legend.
 - Show the focus in a strong color. Make the other data grey or more transparent, but keep it visible.
 - Use text colors that are different from data colors. Make the title, subtitle, and body text clearly different.
-- Put the units in the tick labels, for example `40 mm`. Then remove the axis title.
+  A direct label can use a darker shade of its data color with 4.5:1 contrast to the background.
+- Name the measure in the title or subtitle.
+  - Put short units in the tick labels, for example `40 mm`, `$5`, or `20%`, or put the unit only on the top tick. Then remove the axis title.
+  - Keep an axis title with the units when the figure is for a manuscript or a journal, when the unit is long, or when the axis uses a log scale.
 - Test the palette for color vision deficiency. Also test the colors between the palette anchors.
 
 ## Choose the tool
