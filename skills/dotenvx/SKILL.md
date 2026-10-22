@@ -19,6 +19,17 @@ The goal is to keep `.env` files encrypted and secret values out of command outp
 - Do not ask the user to start Claude with `dotenvx run -- claude`.
   Then each secret is in the environment of each Bash call, and any command can print it.
 
+## Read a secret
+
+- Do not run `dotenvx decrypt` or `dotenvx get`. Do not read, print, or store a decrypted value.
+  When a command needs one, use `dotenvx run --redact -- <command>`.
+  - `decrypt` writes the plain values back into the `.env` file, which can then be committed.
+  - `get` prints the plain value.
+- When the user needs to see a decrypted value, tell them to run `dotenvx get <KEY>` in their own terminal.
+  Do not suggest `! dotenvx get <KEY>`. The output of a `!` command goes into the transcript.
+- Do not ask the user to paste or type the value into the chat. Ask only whether it is correct.
+- Do not suggest `dotenvx decrypt` to the user.
+
 ## Add or change secrets
 
 - Do not put a secret value in a command, a file, or a message.
