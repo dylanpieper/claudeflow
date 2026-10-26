@@ -40,6 +40,9 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - If no automated test covers a change, tell in the PR:
   - How you verified it.
   - How another person can reproduce the verification.
+- In a PR or issue description or comment on GitHub, write each paragraph on one line.
+  - GitHub shows each line break in these as a new line. It does not join the lines again.
+  - This rule overrides "keep lines short" in Writing.
 
 ## Design
 
