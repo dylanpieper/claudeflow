@@ -26,6 +26,8 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
   - In an organization repository, also `<owner>/practices` and `<owner>/.github`.
 - Repository conventions win, then the practices repository, then `.github`, then these rules.
 - Do the steps that the conventions require, for example a draft PR or an AI-use statement.
+- Start each PR description with the issue that the PR fixes or the feature that it adds.
+  When it applies, add a user story or the user's perspective.
 - In each PR description, name the model and its version, not only the tool.
   - Put it in the AI-use statement or the attribution line: `Claude Code (<model> <version>)`.
   - Name only the model that runs the main session, not subagent models.
@@ -51,6 +53,10 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 
 ## Writing
 
+- Write calmly, clearly, and concisely. Make the text easy to scan.
+- Proofread and refine docs, PR descriptions, and messages to other people in 2 or 3 passes.
+- In emails and messages to other people, do not overexplain or add too much structure.
+  Respect their expertise and their choices.
 - Write docs in ASD-STE100 Simplified Technical English.
 - In docs, state the requirements, environment, and package versions.
 - In docs, do not put comments in code blocks. Explain the outcome in the text around them.
