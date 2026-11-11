@@ -199,6 +199,8 @@ claude plugin marketplace add wdm0006/python-skills
 claude plugin install python-library-foundations@dev-skills
 claude plugin marketplace add EmilHvitfeldt/slidecrafting-book.com
 claude plugin install slidecrafting@slidecrafting
+claude plugin marketplace add Dammyjay93/interface-design
+claude plugin install interface-design@interface-design
 ```
 
 Run `roborev init` in each repository that you want to review.
