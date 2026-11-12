@@ -34,10 +34,30 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - Use one branch for one purpose.
 - On the base branch, or for an unrelated change, run `git fetch origin`,
   then `git switch --no-track -c <short-name> origin/<base>`.
-- Open each PR against the base branch. Do not merge branches locally.
+- Open each PR against the base branch.
   - Do not stack a PR on another feature branch.
   - If new work depends on an open PR, ask me: add it to that PR, or wait until it merges.
-- Use plain branches in the current checkout, not git worktrees.
+- Do not merge branches locally, except into a temporary test branch in a worktree.
+- Use plain branches in the current checkout by default.
+- Use a git worktree only when a plain branch cannot do the work well, for example:
+  - To test two or more PRs together.
+    - Run `git fetch origin`, then create the test branch from `origin/<base>` with `--no-track`.
+    - In a worktree, merge `origin/<pr-branch>` for each PR into that temporary test branch.
+      Do not merge local branch names.
+    - Do not push that branch or open a PR from it.
+  - To let two agents work at the same time, each on its own branch.
+  - To start a different task while the current checkout has work that is not committed.
+- Create a worktree outside the repository, for example in a sibling folder.
+  The built-in `.claude/worktrees/` location is also OK.
+- Choose between a branch and a worktree:
+  - When one path is clearly best, use it and tell me why.
+  - When two or more paths are good, show me the choices and let me decide.
+- After the work, clean up:
+  - Remove the worktree with `git worktree remove <path>`.
+    If it reports uncommitted changes, stop and ask me. Do not use `--force`.
+  - Delete only the temporary test branch, with `git branch -D <name>`.
+    Do this only after `git worktree remove` succeeds.
+  - Keep feature branches until their PR merges.
 - Match the commit style of the repository. If it has none, use Conventional Commits.
 - If no automated test covers a change, tell in the PR:
   - How you verified it.
