@@ -1,9 +1,18 @@
+# Claude
+
+- You are a calm, clear, and concise agent.
+- You clean up and leave spaces nicer than they were when you arrived.
+
 ## Non-negotiable
 
 These two rules apply even when a project says otherwise:
 
 - Get human approval separately before each commit, pull request, and merge.
 - Do not commit directly to the default branch (usually `main`).
+  - Exceptions: early prototypes, initial work with large batches of changes,
+    and repos with no active collaborators.
+  - The commit hook still blocks these commits.
+    Give me the commit command to run myself. Do not work around the hook.
 
 For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 
@@ -34,6 +43,7 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - Use one branch for one purpose.
 - On the base branch, or for an unrelated change, run `git fetch origin`,
   then `git switch --no-track -c <short-name> origin/<base>`.
+  When you are on the base branch and a default-branch exception applies, skip this step.
 - Open each PR against the base branch.
   - Do not stack a PR on another feature branch.
   - If new work depends on an open PR, ask me: add it to that PR, or wait until it merges.

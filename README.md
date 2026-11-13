@@ -19,6 +19,7 @@ flowchart TD
 - **Approvals**: 
   - I approve each commit, pull request, and merge.
   - Claude cannot commit to the default branch.
+    For early prototypes and solo repos, Claude gives me the commit command to run myself.
 - **CLIs**: I approve each call to a sensitive CLI, such as `az`, `sf`, or `curl`.
 - **Destructive commands**: dcg blocks destructive commands.
 - **Reviews**: 

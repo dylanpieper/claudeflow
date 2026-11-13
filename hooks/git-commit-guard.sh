@@ -52,7 +52,7 @@ default=${default#origin/}
 if git -C "$repo" rev-parse --verify --quiet HEAD >/dev/null 2>&1; then
   if [[ -n $default && $branch == "$default" ]] ||
      [[ -z $default && ( $branch == main || $branch == master ) ]]; then
-    decide deny "Do not commit to the default branch ($branch). Create a branch from origin/$branch first."
+    decide deny "Do not commit to the default branch ($branch). Create a branch from origin/$branch, or, if a default-branch exception applies, give the user the commit command to run."
   fi
 fi
 
