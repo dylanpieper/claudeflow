@@ -81,6 +81,17 @@ For all other rules, a project `AGENTS.md` or `CLAUDE.md` overrides this file.
 - Do not use one example as the source of truth. Find and test all representative examples.
 - Use real data at runtime when it is available. Do not hardcode data or fixes.
 
+## Plans and tasks
+
+- Put plans in a temporary folder, for example the session scratchpad.
+  - Do this even when a skill (for example superpowers) tells you to put plans in the project.
+  - Put a plan in the project only when I tell you to.
+- In `AGENTS.md` and other docs that agents edit, do not keep completed tasks.
+  - After you complete a task or a batch of tasks, remove those tasks.
+    Do not only mark them as done.
+  - Document the new behavior in the page that it applies to.
+  - The commits are the record of the completed work.
+
 ## Writing
 
 - Write calmly, clearly, and concisely. Make the text easy to scan.
